@@ -1,0 +1,17 @@
+{% extends 'RentBundle::base.html.twig' %}
+{% from 'MopaBootstrapBundle::flash.html.twig' import flash %}
+
+{% block headline %}Buchung löschen{% endblock %}
+
+{% block content %}
+
+	{{ flash('error', '<b>ACHTUNG</b> Möchten Sie die Buchung unwiderruflich löschen?', false, true) }}
+
+	<form class="inline" action="{{ path('booking_delete', { 'id': booking.id }) }}" method="post">
+		<input type="hidden" name="confirmed" value="1" />
+		<div class="form-actions">
+			<button class="btn btn-danger"><i class="icon-trash icon-white"></i> {% trans %}Buchung löschen{% endtrans %}</button>
+			<a href="{{ path('booking_index') }}" class="btn">{% trans %}Abbrechen{% endtrans %}</a>
+		</div>
+	</form>
+{% endblock %}

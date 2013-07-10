@@ -1,0 +1,15 @@
+{% extends 'RentBundle::base.html.twig' %}
+
+{% block headline %}Buchung bearbeiten{% endblock %}
+
+{% block content %}
+	<form action="{{ path('booking_update', {'id': id}) }}" method="post" {{ form_enctype(form) }} class="form-horizontal">
+		{{ form_widget(form) }}
+		<div class="form-actions">
+	    	<input class="btn btn-primary" type="submit" value="Buchung aktualisieren" />
+			<a href="{{ path('booking_index') }}" class="btn">Abbrechen</a>
+			<a href="{{ path('booking_delete', {'id': id}) }}" class="btn btn-danger"><i class="icon-trash icon-white"></i> Buchung löschen</a>
+		</div>
+	</form>
+
+{% endblock %}

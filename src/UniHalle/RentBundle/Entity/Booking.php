@@ -21,13 +21,13 @@ class Booking
     private $id;
 
     /**
-     * @ORM\ManyToOne(targetEntity="Device", inversedBy="bookings", cascade={"all"})
+     * @ORM\ManyToOne(targetEntity="Device", inversedBy="bookings")
      * @Assert\NotNull
      */
     private $device;
 
     /**
-     * @ORM\ManyToOne(targetEntity="User", inversedBy="bookings", cascade={"all"})
+     * @ORM\ManyToOne(targetEntity="User", inversedBy="bookings")
      * @Assert\NotNull
      */
     private $user;

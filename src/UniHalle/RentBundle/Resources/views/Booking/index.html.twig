@@ -13,6 +13,9 @@
 				<th>Gerät</th>
 				<th>Entleihdatum</th>
 				<th>Rückgabedatum</th>
+				{% if is_granted('ROLE_ADMIN') %}
+					<th>Bearbeiten</th>
+				{% endif %}
 				<th>Status</th>
 				{% if is_granted('ROLE_ADMIN') %}
 					<th>Dokumente</th>
@@ -29,6 +32,9 @@
 					<td>{{ booking.dateFrom|date('d.m.Y') }}</td>
 					<td>{{ booking.dateTo|date('d.m.Y') }}</td>
 					{% if is_granted('ROLE_ADMIN') %}
+						<td>
+							<a href="{{ path('booking_update', {'id': booking.id}) }}" class="btn btn-small"><i class="icon-pencil"></i> Bearbeiten</a>
+						</td>
 						<td>
 							<div class="btn-group">
 							  	<a class="btn dropdown-toggle btn-small {% if booking.status == 'preliminary' %}btn-info{% elseif booking.status == 'canceled' %}btn-warning{% elseif booking.status == 'gotBack' %}btn-success{% elseif booking.status == 'inRent' %}btn-danger{% endif %}" data-toggle="dropdown" href="#">

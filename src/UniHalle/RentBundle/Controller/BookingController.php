@@ -67,6 +67,8 @@ class BookingController extends Controller
      * @Secure(roles="ROLE_USER")
      * @todo: set correct user
      * @todo: check if there is another booking in this time
+     * @todo: check holidays
+     * @todo: check dates on store
      * @todo: send email to user and admin
      */
     public function newAction(Request $request, $device_id, $start_display = null, $start_date = null, $end_date = null)
@@ -180,6 +182,7 @@ class BookingController extends Controller
      * @Route("/update/{id}", name="booking_update")
      * @Secure(roles="ROLE_ADMIN")
      * @todo: inform user
+     * @todo: check date
      */
     public function updateAction(Request $request, $id)
     {
@@ -188,10 +191,6 @@ class BookingController extends Controller
                       ->findOneById($id);
         if (!$booking) {
             throw $this->createNotFoundException('Buchung wurde nicht gefunden.');
-        }
-
-        if (!$this->currentUserCanEditBooking($booking)) {
-            throw new AccessDeniedHttpException('Sie dürfen diese Buchung nicht bearbeiten.');
         }
 
         $form = $this->createForm(new BookingType($this->get('translator'), $this->get('security.context')), $booking);
@@ -209,30 +208,26 @@ class BookingController extends Controller
         }
 
         return $this->render(
-            'RentBundle:Buchung:update.html.twig',
+            'RentBundle:Booking:update.html.twig',
             array(
                 'form' => $form->createView(),
-                'id'   => $device->getId()
+                'id'   => $booking->getId()
             )
         );
     }
 
     /**
      * @Route("/delete/{id}", name="booking_delete")
-     * @Secure(roles="ROLE_USER")
+     * @Secure(roles="ROLE_ADMIN")
      * @todo: inform user
      */
     public function deleteAction(Request $request, $id)
     {
         $em = $this->getDoctrine()->getManager();
-        $booking = $em->getRepository('RentBundle:Rent')
+        $booking = $em->getRepository('RentBundle:Booking')
                       ->findOneById($id);
         if (!$booking) {
             throw $this->createNotFoundException('Buchung wurde nicht gefunden.');
-        }
-
-        if (!$this->currentUserCanEditBooking($booking)) {
-            throw new AccessDeniedHttpException('Sie dürfen diese Buchung nicht bearbeiten.');
         }
 
         if ($request->isMethod('POST') && $request->request->get('confirmed') == 1) {
@@ -247,7 +242,7 @@ class BookingController extends Controller
         }
 
         return $this->render(
-            'RentBundle:Rent:delete.html.twig',
+            'RentBundle:Booking:delete.html.twig',
             array('booking' => $booking)
         );
     }
