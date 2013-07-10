@@ -34,6 +34,7 @@ security:
             logout:
                 path:   /logout
                 target: /
+                invalidate_session: false
             remember_me:
                 key:      "%secret%"
                 lifetime: 31536000
