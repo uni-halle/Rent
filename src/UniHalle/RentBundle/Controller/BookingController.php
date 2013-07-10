@@ -85,7 +85,6 @@ class BookingController extends Controller
 
         $booking->setDevice($device);
         $booking->setUser($user);
-        $booking->setStatus(BookingStatusType::PRELIMINARY);
 
         if ($start_display !== null) {
             $startDisplay = new \DateTime($start_display . '-01 00:00:00');
@@ -150,6 +149,7 @@ class BookingController extends Controller
         if ($request->isMethod('POST')) {
             $form->bind($request);
             if ($form->isValid()) {
+                $booking->setStatus(BookingStatusType::PRELIMINARY);
                 $em->persist($booking);
                 $em->flush();
                 $this->get('session')->getFlashBag()->add(

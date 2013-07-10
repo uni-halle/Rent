@@ -5,6 +5,7 @@ namespace UniHalle\RentBundle\Form\Type;
 use Doctrine\ORM\EntityRepository;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\FormBuilderInterface;
+use UniHalle\RentBundle\Types\BookingStatusType;
 
 class BookingType extends AbstractType
 {
@@ -29,8 +30,11 @@ class BookingType extends AbstractType
             null,
             array('label' => $this->translator->trans('Bis'))
         );
-
-
+        $builder->add(
+            'status',
+            'choice',
+            ['choices' => BookingStatusType::getChoices()]
+        );
     }
 
     public function getName()
