@@ -14,6 +14,9 @@
 				<th>Entleihdatum</th>
 				<th>Rückgabedatum</th>
 				<th>Status</th>
+				{% if is_granted('ROLE_ADMIN') %}
+					<th>Dokumente</th>
+				{% endif %}
 			</tr>
 		</thead>
 		<tbody>
@@ -27,50 +30,43 @@
 					<td>{{ booking.dateTo|date('d.m.Y') }}</td>
 					{% if is_granted('ROLE_ADMIN') %}
 						<td>
-						{#
-						{% if booking. %}btn-info{% elseif booking.canceled %}btn-warning{% elseif booking.gotBack %}btn-success{% elseif booking.inRent %}btn-warning{% endif %}
-						#}
 							<div class="btn-group">
-							  	<a class="btn dropdown-toggle btn-small" data-toggle="dropdown" href="#">
+							  	<a class="btn dropdown-toggle btn-small {% if booking.status == 'preliminary' %}btn-info{% elseif booking.status == 'canceled' %}btn-warning{% elseif booking.status == 'gotBack' %}btn-success{% elseif booking.status == 'inRent' %}btn-danger{% endif %}" data-toggle="dropdown" href="#">
 							  	{{ booking.status|readable_enum_value('BookingStatusType') }}
 						    	<span class="caret"></span>
 							  	</a>
 							  	<ul class="dropdown-menu">
 							  		<li>
-							  			<a href="{{ path('booking_status', {'id': booking.id}) }}"><i class="icon-question-sign"></i> Vorläufige Buchung</a>
+							  			<a href="{{ path('booking_status', {'id': booking.id, 'status': 'preliminary'}) }}"><i class="icon-question-sign"></i> Vorläufige Buchung</a>
 							  		</li>
 							  		<li>
-							  			<a href="{{ path('booking_status', {'id': booking.id}) }}"><i class="icon-ok"></i> Buchung bestätigen</a>
+							  			<a href="{{ path('booking_status', {'id': booking.id, 'status': 'approved'}) }}"><i class="icon-ok"></i> Genehmigte Buchung</a>
 							  		</li>
 							  		<li>
-							  			<a href="{{ path('booking_status', {'id': booking.id}) }}"><i class="icon-remove"></i> Buchung ablehnen</a>
+							  			<a href="{{ path('booking_status', {'id': booking.id, 'status': 'canceled'}) }}"><i class="icon-remove"></i> Abgelehnte Buchung</a>
 							  		</li>
 							  		<li class="divider"></li>
 							  		<li>
-							  			<a href="{{ path('booking_status', {'id': booking.id}) }}"><i class="icon-hand-right"></i> Gerät ausleihen</a>
+							  			<a href="{{ path('booking_status', {'id': booking.id, 'status': 'inRent'}) }}"><i class="icon-hand-right"></i> Gerät ausgeliehen</a>
 							  		</li>
 							  		<li>
-							  			<a href="{{ path('booking_status', {'id': booking.id}) }}"><i class="icon-hand-left"></i> Gerät zurückerhalten</a>
+							  			<a href="{{ path('booking_status', {'id': booking.id, 'status': 'gotBack'}) }}"><i class="icon-hand-left"></i> Gerät zurückerhalten</a>
 							  		</li>
 								</ul>
 							</div>
 						</td>
+						<td>
+							{% if booking.status == 'inRent' %}
+								<a href="{{ path('booking_inRentDoc', {'id': booking.id}) }}" target="_blank" class="btn btn-small"><i class="icon-download"></i> Leihschein</a>
+							{% elseif booking.status == 'gotBack' %}
+								<a href="{{ path('booking_gotBackDoc', {'id': booking.id}) }}" target="_blank" class="btn btn-small"><i class="icon-download"></i> Rückgabeschein</a>
+							{% endif %}
+						</td>
 					{% elseif is_granted('ROLE_USER') %}
 						<td>
+							<span class="label {% if booking.status == 'preliminary' %}label-info{% elseif booking.status == 'canceled' %}label-important{% elseif booking.status == 'gotBack' %}label-success{% elseif booking.status == 'inRent' %}label-warning{% endif %}">
 							{{ booking.status|readable_enum_value('BookingStatusType') }}
-							{#
-							{% if booking.preliminary %}
-								<span class="label label-info">Vorläufige Buchung</span>
-							{% elseif booking.canceled %}
-								<span class="label label-important">Buchung abgelehnt</span>
-							{% elseif booking.gotBack %}
-								<span class="label label-success">Gerät zurückerhalten</span>
-							{% elseif booking.inRent %}
-								<span class="label label-warning">Geräte ausgeliehen</span>
-							{% else %}
-								<span class="label">Bestätigte Buchung</span>
-							{% endif %}
-							#}
+							</span>
 						</td>
 					{% endif %}
 				</tr>

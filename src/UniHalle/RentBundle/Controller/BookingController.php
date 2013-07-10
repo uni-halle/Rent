@@ -257,7 +257,7 @@ class BookingController extends Controller
      * @Secure(roles="ROLE_ADMIN")
      * @todo: send mail to user
      */
-    public function statusAction($id, $status = null)
+    public function statusAction($id, $status)
     {
         $em = $this->getDoctrine()->getManager();
         $booking = $em->getRepository('RentBundle:Booking')
@@ -265,7 +265,30 @@ class BookingController extends Controller
         if (!$booking) {
             throw $this->createNotFoundException('Buchung wurde nicht gefunden.');
         }
-        $booking->setStatus($status);
+        switch ($status) {
+            case 'approved':
+                $booking->setStatus(BookingStatusType::APPROVED);
+                break;
+            case 'canceled':
+                $booking->setStatus(BookingStatusType::CANCELED);
+                break;
+            case 'inRent':
+                $booking->setStatus(BookingStatusType::IN_RENT);
+                break;
+            case 'gotBack':
+                $booking->setStatus(BookingStatusType::GOT_BACK);
+                break;
+            case 'preliminary':
+                $booking->setStatus(BookingStatusType::PRELIMINARY);
+                break;
+            default:
+                $this->get('session')->getFlashBag()->add(
+                    'error',
+                    $this->get('translator')->trans('Ungültiger Status.')
+                );
+                return $this->redirect($this->generateUrl('booking_index'));
+                break;
+        }
         $em->flush();
 
         $this->get('session')->getFlashBag()->add(
@@ -273,6 +296,46 @@ class BookingController extends Controller
             $this->get('translator')->trans('Buchung wurde aktualisiert.')
         );
         return $this->redirect($this->generateUrl('booking_index'));
+    }
+
+    /**
+     * @Route("/inRentDoc/{id}", name="booking_inRentDoc")
+     * @Secure(roles="ROLE_ADMIN")
+     * @todo: update template
+     */
+    public function inRentDocAction($id)
+    {
+        $em = $this->getDoctrine()->getManager();
+        $booking = $em->getRepository('RentBundle:Booking')
+                      ->findOneById($id);
+        if (!$booking) {
+            throw $this->createNotFoundException('Buchung wurde nicht gefunden.');
+        }
+
+        return $this->render(
+            'RentBundle:Booking:doc_inRent.html.twig',
+            array('booking' => $booking)
+        );
+    }
+
+    /**
+     * @Route("/gotBackDoc/{id}", name="booking_gotBackDoc")
+     * @Secure(roles="ROLE_ADMIN")
+     * @todo: update template
+     */
+    public function gotBackDocAction($id)
+    {
+        $em = $this->getDoctrine()->getManager();
+        $booking = $em->getRepository('RentBundle:Booking')
+                      ->findOneById($id);
+        if (!$booking) {
+            throw $this->createNotFoundException('Buchung wurde nicht gefunden.');
+        }
+
+        return $this->render(
+            'RentBundle:Booking:doc_gotBack.html.twig',
+            array('booking' => $booking)
+        );
     }
 
     /**

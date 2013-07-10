@@ -20,6 +20,6 @@ class BookingStatusType extends AbstractEnumType
         self::CANCELED    => 'Abgelehnte Buchung',
         self::APPROVED    => 'Genehmigte Buchung',
         self::IN_RENT     => 'Gerät ausgeliehen',
-        self::GOT_BACK    => 'Gerät zurück erhalten',
+        self::GOT_BACK    => 'Gerät zurückerhalten',
     ];
 }
