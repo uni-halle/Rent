@@ -1,0 +1,93 @@
+.chzn-container-multi .chzn-choices .search-choice .search-choice-close {
+    height: 11px;
+    top: 5px;
+    right: 4px;
+}
+
+.chzn-container-single .chzn-single {
+    border-radius: 4px;
+}
+
+.page-header {
+    color: #5A5A5A;
+}
+
+.page-header a.btn {
+    font-weight: normal;
+}
+
+/*** Login ***/
+
+.dropdown-menu-login {
+    min-width: 200px;
+    padding: 14px;
+}
+
+.dropdown-menu-login form {
+    margin-bottom: 0;
+}
+
+label.checkbox {
+    margin-bottom: 12px;
+}
+
+.form-signin {
+    max-width: 400px;
+    padding: 19px 29px 29px;
+    margin: 0 auto 20px;
+    margin-top: 50px;
+    background-color: #f5f5f5;
+    border: 1px solid #e5e5e5;
+    -webkit-border-radius: 5px;
+    -moz-border-radius: 5px;
+    border-radius: 5px;
+    -webkit-box-shadow: 0 1px 2px rgba(0,0,0,.05);
+    -moz-box-shadow: 0 1px 2px rgba(0,0,0,.05);
+    box-shadow: 0 1px 2px rgba(0,0,0,.05);
+}
+
+.form-signin .form-signin-heading,
+.form-signin .checkbox {
+    margin-bottom: 10px;
+}
+
+.form-signin input[type="text"],
+.form-signin input[type="password"] {
+    font-size: 16px;
+    height: auto;
+    margin-bottom: 15px;
+    padding: 7px 9px;
+}
+
+table.calendar {
+    margin-right: 20px;
+    margin-bottom: 20px;
+    display: inline-block;
+    vertical-align: top;
+}
+
+table.calendar td, table.calendar th {
+    width: 2em;
+    text-align: center;
+}
+
+table.calendar td.booked {
+    background-color: #F2DEDE;
+}
+
+table.calendar td.free {
+    background-color: #DFF0D8;
+}
+
+table.calendar td.weekend {
+    background-color: #F2DEDE;
+    color: #B94A48;
+}
+
+table.calendar th.month {
+    background-color: #f0f0f0;
+}
+
+table.calendar td a {
+    color: #333333;
+}

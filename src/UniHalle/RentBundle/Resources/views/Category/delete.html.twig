@@ -1,0 +1,16 @@
+{% extends 'RentBundle::base.html.twig' %}
+{% from 'MopaBootstrapBundle::flash.html.twig' import flash %}
+{% block headline %}{% trans %}Kategorie löschen{% endtrans %}{% endblock %}
+
+{% block content %}
+
+	{{ flash('error', '<b>ACHTUNG</b> Möchten Sie die Kategorie "%name%" unwiderruflich löschen?'|trans({ '%name%': category.name }), false, true) }}
+
+	<form class="inline" action="{{ path('category_delete', { 'id': category.id }) }}" method="post">
+		<input type="hidden" name="confirmed" value="1" />
+		<div class="form-actions">
+			<button class="btn btn-danger"><i class="icon-trash icon-white"></i> {% trans %}Kategorie löschen{% endtrans %}</button>
+			<a href="{{ path('category_index') }}" class="btn">{% trans %}Abbrechen{% endtrans %}</a>
+		</div>
+	</form>
+{% endblock %}

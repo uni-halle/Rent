@@ -1,0 +1,9 @@
+rent:
+    resource: "@RentBundle/Resources/config/routing.yml"
+    prefix:   /
+
+login_check:
+    pattern: /login_check
+
+logout:
+    path: /logout

@@ -1,0 +1,4 @@
+frontend:
+    resource: "@RentBundle/Controller"
+    type:     annotation
+    prefix: /

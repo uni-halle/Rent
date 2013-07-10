@@ -1,0 +1,25 @@
+{% extends 'RentBundle::base.html.twig' %}
+
+{% block headline %}"{{ device.name }}" ausleihen{% endblock %}
+
+{% block content %}
+	<p class="lead">
+		Beginn der Entleihung: {{ startDateObj|date('d.m.Y') }}<br />
+		Ende der Entleihung: {{ endDateObj|date('d.m.Y') }}<br />
+	</p>
+
+	<form action="{{ path('booking_new', {'device_id': device.id}) }}" method="post" {{ form_enctype(form) }} class="form-horizontal">
+		<div class="hidden">
+			{{ form_row(form.dateFrom) }}
+			{{ form_row(form.dateTo) }}
+		</div>
+
+		{{ form_errors(form) }}
+		{{ form_rest(form) }}
+		<div class="form-actions">
+	    	<input class="btn btn-primary" type="submit" value="Gerät ausleihen" />
+			<a href="{{ path('booking_index') }}" class="btn">Abbrechen</a>
+		</div>
+	</form>
+
+{% endblock %}

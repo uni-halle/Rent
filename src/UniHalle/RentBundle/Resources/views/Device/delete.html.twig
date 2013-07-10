@@ -1,0 +1,14 @@
+{% extends 'RentBundle::base.html.twig' %}
+{% from 'MopaBootstrapBundle::flash.html.twig' import flash %}
+{% block headline %}{% trans %}Gerät löschen{% endtrans %}{% endblock %}
+
+{% block content %}
+	{{ flash('error', '<b>ACHTUNG</b> Möchten Sie das Gerät "%name%" unwiderruflich löschen?'|trans({ '%name%': device.name }), false, true) }}
+	<form class="inline" action="{{ path('device_delete', { 'id': device.id }) }}" method="post">
+		<input type="hidden" name="confirmed" value="1" />
+		<div class="form-actions">
+			<button class="btn btn-danger"><i class="icon-trash icon-white"></i> {% trans %}Gerät löschen{% endtrans %}</button>
+			<a href="{{ path('device_index') }}" class="btn">{% trans %}Abbrechen{% endtrans %}</a>
+		</div>
+	</form>
+{% endblock %}

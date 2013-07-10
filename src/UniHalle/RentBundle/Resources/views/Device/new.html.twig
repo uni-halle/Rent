@@ -1,0 +1,16 @@
+{% extends 'RentBundle::base.html.twig' %}
+
+{% block headline %}Gerät hinzufügen{% endblock %}
+
+{% block content %}
+
+<form action="{{ path('device_new') }}" method="post" {{ form_enctype(form) }} class="form-horizontal">
+	{{ form_errors(form) }}
+	{{ form_widget(form) }}
+	<div class="form-actions">
+    	<input class="btn btn-primary" type="submit" value="Gerät hinzufügen" />
+		<a href="{{ path('device_index') }}" class="btn">Abbrechen</a>
+	</div>
+</form>
+
+{% endblock %}

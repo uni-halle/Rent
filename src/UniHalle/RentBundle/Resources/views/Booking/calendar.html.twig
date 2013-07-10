@@ -1,0 +1,50 @@
+<div class="calendar">
+{% for month in dates %}
+		<table class="calendar">
+			<thead>
+				<tr>
+					<th colspan="7" class="month">{{ month.month|date('F Y') }}</th>
+				</tr>
+				<tr>
+					<th>Mo</th>
+					<th>Di</th>
+					<th>Mi</th>
+					<th>Do</th>
+					<th>Fr</th>
+					<th>Sa</th>
+					<th>So</th>
+				</tr>
+			</thead>
+			<tbody>
+				<tr>
+				{% if month.prepend > 0 %}
+				{% for i in range(0, month.prepend-1) %}
+					<td></td>
+				{% endfor %}
+				{% endif %}
+				{% for day in month.dates %}
+					<td class="{{ day.class }}">
+						{% if day.class == 'free' %}
+							{% if dateToChoose == 'start' %}
+								<a href="{{ path('booking_new', {'device_id': device.id,
+																 'start_display': start_display,
+																 'start_date': day.date|date('Y-m-d') }) }}">{{ day.date|date('d') }}</a>
+							{% elseif dateToChoose == 'end' %}
+								<a href="{{ path('booking_new', {'device_id': device.id,
+																 'start_display': start_display,
+																 'start_date': startDateObj|date('Y-m-d'),
+																 'end_date': day.date|date('Y-m-d') }) }}">{{ day.date|date('d') }}</a>
+							{% endif %}
+						{% else %}
+							{{ day.date|date('d') }}
+						{% endif %}
+					</td>
+					{% if (loop.index0 + month.prepend)%7 == 6 and not loop.last %}
+						</tr><tr>
+					{% endif %}
+				{% endfor %}
+				</tr>
+			</tbody>
+		</table>
+{% endfor %}
+</div>

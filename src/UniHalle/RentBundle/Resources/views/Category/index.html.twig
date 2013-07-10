@@ -1,0 +1,24 @@
+{% extends 'RentBundle::base.html.twig' %}
+{% from 'MopaBootstrapBundle::flash.html.twig' import flash %}
+{% block headline %}Kategorien{% endblock %}
+
+{% block content %}
+
+{% if categories|length == 0 %}
+	{{ flash('info', 'Es sind keine Kategorien vorhanden.', false, true) }}
+{% else %}
+	<table class="table table-striped">
+		<tbody>
+			{% for category in categories %}
+				<tr>
+					<td><a href="{{ path('category_show', {'id': category.id}) }}">{{ category.name }}</a></td>
+				</tr>
+			{% endfor %}
+		</tbody>
+	</table>
+{% endif %}
+
+{% if is_granted('ROLE_ADMIN') %}
+	<a href="{{ path('category_new') }}" class="btn btn-success btn-small"><i class="icon-white icon-star"></i> Neue Kategorie erstellen</a>
+{% endif %}
+{% endblock %}

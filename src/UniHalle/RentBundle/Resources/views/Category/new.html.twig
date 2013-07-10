@@ -1,0 +1,16 @@
+{% extends 'RentBundle::base.html.twig' %}
+
+{% block headline %}Kategorie hinzufügen{% endblock %}
+
+{% block content %}
+
+<form action="{{ path('category_new') }}" method="post" {{ form_enctype(form) }} class="form-horizontal">
+	{{ form_errors(form) }}
+	{{ form_widget(form) }}
+	<div class="form-actions">
+    	<input class="btn btn-primary" type="submit" value="Kategorie erstellen" />
+		<a href="{{ path('category_index') }}" class="btn">Abbrechen</a>
+	</div>
+</form>
+
+{% endblock %}

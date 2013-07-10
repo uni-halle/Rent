@@ -1,0 +1,23 @@
+{% extends 'RentBundle::base.html.twig' %}
+
+{% block headline %}"{{ device.name }}" ausleihen{% endblock %}
+
+{% block content %}
+	{% if dateToChoose == 'start' %}
+		<div class="alert alert-info">Bitte wählen Sie den gewünschten Beginn Ihrer Entleihung</div>
+	{% elseif dateToChoose == 'end' %}
+		<div class="alert alert-info">Bitte wählen Sie das gewünschte Ende Ihrer Entleihung</div>
+		<p class="lead">
+			Beginn der Entleihung: {{ startDateObj|date('d.m.Y') }}
+		</p>
+	{% endif %}
+
+	{% include 'RentBundle:Booking:calendar.html.twig' with {'dates': dates, 'device': device, 'start_display': start_display, 'dateToChoose': dateToChoose, 'startDateObj': startDateObj} %}
+
+	<div class="clearfix">
+	{% if prevDisplayDate %}
+		<a href="{{ path('booking_new', { 'device_id': device.id, 'start_date': startDate, 'start_display': prevDisplayDate|date('Y-m') }) }}" class="btn pull-left">zurück</a>
+	{% endif %}
+	<a href="{{ path('booking_new', { 'device_id': device.id, 'start_date': startDate, 'start_display': nextDisplayDate|date('Y-m') }) }}" class="btn pull-right">weiter</a>
+	</div>
+{% endblock %}

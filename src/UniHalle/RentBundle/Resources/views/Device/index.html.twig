@@ -1,0 +1,35 @@
+{% extends 'RentBundle::base.html.twig' %}
+{% from 'MopaBootstrapBundle::flash.html.twig' import flash %}
+{% block headline %}
+	{% if category is defined %}
+		{{ category.name }}
+		{% if is_granted('ROLE_ADMIN') %}
+			<a href="{{ path('category_update', {'id': category.id}) }}" class="btn btn-small"><i class="icon-edit"></i> Bearbeiten</a>
+		{% endif %}
+	{% else %}
+		Alle Geräte
+	{% endif %}
+{% endblock %}
+
+{% block content %}
+{% if devices|length == 0 %}
+	{{ flash('info', 'In dieser Kategorie sind keine Geräte vorhanden.', false, true) }}
+{% else %}
+	<table class="table table-striped">
+		<tbody>
+			{% for device in devices %}
+				<tr>
+					<td><a href="{{ path('device_show', {'id': device.id}) }}">{{ device.name }}</a></td>
+				</tr>
+			{% endfor %}
+		</tbody>
+	</table>
+{% endif %}
+{% if is_granted('ROLE_ADMIN') %}
+	{% if category is defined %}
+		<a href="{{ path('device_new', {'category_id': category.id}) }}" class="btn btn-success btn-small"><i class="icon-white icon-star"></i> Neues Gerät hinzufügen</a>
+	{% else %}
+		<a href="{{ path('device_new') }}" class="btn btn-success btn-small"><i class="icon-white icon-star"></i> Neues Gerät hinzufügen</a>
+	{% endif %}
+{% endif %}
+{% endblock %}

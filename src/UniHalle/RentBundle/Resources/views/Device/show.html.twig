@@ -1,0 +1,27 @@
+{% extends 'RentBundle::base.html.twig' %}
+
+{% block headline %}
+	{{ device.name }}
+	{% if is_granted('ROLE_ADMIN') %}
+		<a href="{{ path('device_update', {'id': device.id}) }}" class="btn btn-small"><i class="icon-edit"></i> Bearbeiten</a>
+	{% endif %}
+{% endblock %}
+
+{% block content %}
+<dl>
+	{% if device.deviceNumber != '' %}
+	    <dt>Gerätenummer<dt>
+  		<dd>{{ device.deviceNumber }}</dd>
+  	{% endif %}
+	{% if device.serialNumber != '' %}
+  		<dt>Seriennummer<dt>
+  		<dd>{{ device.serialNumber }}</dd>
+  	{% endif %}
+  	<dt>Beschreibung<dt>
+    <dd>{{ device.description }}</dd>
+</dl>
+
+<div class="form-actions">
+	<a href="{{ path('booking_new', {'device_id': device.id}) }}" class="btn btn-primary btn-big">Dieses Gerät ausleihen</a>
+</div>
+{% endblock %}

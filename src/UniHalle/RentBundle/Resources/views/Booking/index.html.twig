@@ -1,0 +1,81 @@
+{% extends 'RentBundle::base.html.twig' %}
+
+{% block headline %}Buchungen{% endblock %}
+
+{% block content %}
+
+	<table class="table">
+		<thead>
+			<tr>
+				{% if is_granted('ROLE_ADMIN') %}
+				<th>Entleiher</th>
+				{% endif %}
+				<th>Gerät</th>
+				<th>Entleihdatum</th>
+				<th>Rückgabedatum</th>
+				<th>Status</th>
+			</tr>
+		</thead>
+		<tbody>
+			{% for booking in bookings %}
+				<tr>
+					{% if is_granted('ROLE_ADMIN') %}
+						<td>{{ booking.user.commonName }}</td>
+					{% endif %}
+					<td><a href="{{ path('device_show', {'id': booking.device.id}) }}">{{ booking.device.name }}</a></td>
+					<td>{{ booking.dateFrom|date('d.m.Y') }}</td>
+					<td>{{ booking.dateTo|date('d.m.Y') }}</td>
+					{% if is_granted('ROLE_ADMIN') %}
+						<td>
+						{#
+						{% if booking. %}btn-info{% elseif booking.canceled %}btn-warning{% elseif booking.gotBack %}btn-success{% elseif booking.inRent %}btn-warning{% endif %}
+						#}
+							<div class="btn-group">
+							  	<a class="btn dropdown-toggle btn-small" data-toggle="dropdown" href="#">
+							  	{{ booking.status|readable_enum_value('BookingStatusType') }}
+						    	<span class="caret"></span>
+							  	</a>
+							  	<ul class="dropdown-menu">
+							  		<li>
+							  			<a href="{{ path('booking_status', {'id': booking.id}) }}"><i class="icon-question-sign"></i> Vorläufige Buchung</a>
+							  		</li>
+							  		<li>
+							  			<a href="{{ path('booking_status', {'id': booking.id}) }}"><i class="icon-ok"></i> Buchung bestätigen</a>
+							  		</li>
+							  		<li>
+							  			<a href="{{ path('booking_status', {'id': booking.id}) }}"><i class="icon-remove"></i> Buchung ablehnen</a>
+							  		</li>
+							  		<li class="divider"></li>
+							  		<li>
+							  			<a href="{{ path('booking_status', {'id': booking.id}) }}"><i class="icon-hand-right"></i> Gerät ausleihen</a>
+							  		</li>
+							  		<li>
+							  			<a href="{{ path('booking_status', {'id': booking.id}) }}"><i class="icon-hand-left"></i> Gerät zurückerhalten</a>
+							  		</li>
+								</ul>
+							</div>
+						</td>
+					{% elseif is_granted('ROLE_USER') %}
+						<td>
+							{{ booking.status|readable_enum_value('BookingStatusType') }}
+							{#
+							{% if booking.preliminary %}
+								<span class="label label-info">Vorläufige Buchung</span>
+							{% elseif booking.canceled %}
+								<span class="label label-important">Buchung abgelehnt</span>
+							{% elseif booking.gotBack %}
+								<span class="label label-success">Gerät zurückerhalten</span>
+							{% elseif booking.inRent %}
+								<span class="label label-warning">Geräte ausgeliehen</span>
+							{% else %}
+								<span class="label">Bestätigte Buchung</span>
+							{% endif %}
+							#}
+						</td>
+					{% endif %}
+				</tr>
+			{% endfor %}
+		</tbody>
+	</table>
+
+{% endblock %}
