@@ -1,0 +1,55 @@
+{% extends 'RentBundle::base.html.twig' %}
+{% from 'MopaBootstrapBundle::flash.html.twig' import flash %}
+{% block headline %}Inhalte{% endblock %}
+
+{% block content %}
+
+<h3>Seiten</h3>
+<table class="table table-striped">
+	<tbody>
+		{% for site in content %}
+			<tr>
+				<td>{{ site.name }}</td>
+				<td class="span3"><a href="{{ path('site_update', {'id': site.id}) }}" class="btn btn-small btn-primary"><i class="icon-white icon-pencil"></i> Bearbeiten</a></td>
+			</tr>
+		{% endfor %}
+	</tbody>
+</table>
+
+<h3>Dokumente</h3>
+<table class="table table-striped">
+	<tbody>
+		{% for site in documents %}
+			<tr>
+				<td>{{ site.name }}</td>
+				<td class="span3"><a href="{{ path('site_update', {'id': site.id}) }}" class="btn btn-small btn-primary"><i class="icon-white icon-pencil"></i> Bearbeiten</a></td>
+			</tr>
+		{% endfor %}
+	</tbody>
+</table>
+
+<h3>E-Mails an Nutzer</h3>
+<table class="table table-striped">
+	<tbody>
+		{% for site in userMails %}
+			<tr>
+				<td>{{ site.name }}</td>
+				<td class="span3"><a href="{{ path('site_update', {'id': site.id}) }}" class="btn btn-small btn-primary"><i class="icon-white icon-pencil"></i> Bearbeiten</a></td>
+			</tr>
+		{% endfor %}
+	</tbody>
+</table>
+
+<h3>Administrative E-Mails</h3>
+<table class="table table-striped">
+	<tbody>
+		{% for site in adminMails %}
+			<tr>
+				<td>{{ site.name }}</td>
+				<td class="span3"><a href="{{ path('site_update', {'id': site.id}) }}" class="btn btn-small btn-primary"><i class="icon-white icon-pencil"></i> Bearbeiten</a></td>
+			</tr>
+		{% endfor %}
+	</tbody>
+</table>
+
+{% endblock %}

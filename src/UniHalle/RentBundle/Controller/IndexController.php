@@ -18,6 +18,13 @@ class IndexController extends Controller
      */
     public function indexAction()
     {
-        return $this->render('RentBundle:Index:index.html.twig');
+        $em = $this->getDoctrine()->getManager();
+        $site = $em->getRepository('RentBundle:Site')
+                   ->findOneByIdentifier('index');
+        if (!$site) {
+            throw $this->createNotFoundException('Seite wurde nicht gefunden.');
+        }
+
+        return $this->render('RentBundle:Site:show.html.twig', array( 'site'  => $site ));
     }
 }

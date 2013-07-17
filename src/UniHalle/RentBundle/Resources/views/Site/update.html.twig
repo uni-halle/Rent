@@ -1,0 +1,29 @@
+{% extends 'RentBundle::base.html.twig' %}
+
+{% block headline %}Inhalt aktualisieren{% endblock %}
+
+{% block content %}
+
+<h3>{{ site.name }}</h3>
+
+<form action="{{ path('site_update', {'id': site.id}) }}" method="post" {{ form_enctype(form) }} class="form-horizontal">
+	{{ form_errors(form) }}
+	{{ form_widget(form) }}
+
+	{% if site.placeholders|length > 0 %}
+	<h4>Platzhalter</h4>
+	<dl class="dl-horizontal">
+	{% for placeholder in site.placeholders %}
+		<dt>{{ placeholder.name }}</dt>
+		<dd>{{ placeholder.placeholder }}</dd>
+	{% endfor %}
+	</dl>
+	{% endif %}
+
+	<div class="form-actions">
+    	<input class="btn btn-primary" type="submit" value="Inhalt aktualisieren" />
+		<a href="{{ path('site_index') }}" class="btn">Abbrechen</a>
+	</div>
+</form>
+
+{% endblock %}

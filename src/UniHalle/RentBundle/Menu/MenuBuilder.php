@@ -23,7 +23,9 @@ class MenuBuilder extends AbstractNavbarMenuBuilder
             $menu->addChild('Geräte', array('route' => 'category_index'));
             $menu->addChild('Buchungen', array('route' => 'booking_index'));
         }
-
+        if ($this->security->isGranted('ROLE_ADMIN')) {
+            $menu->addChild('Inhalte', array('route' => 'site_index'));
+        }
         return $menu;
     }
 
