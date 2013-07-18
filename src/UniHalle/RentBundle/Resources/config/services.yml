@@ -28,6 +28,11 @@ services:
         arguments:
             - { leftmenu: @rent.menu=, rightmenu: @rent.right_menu= }
             - {  }
-            - { title: "Geräteverleih", titleRoute: "index", staticTop: true, isFluid: false, inverse: true, template:RentBundle:Menu:navbar.html.twig }
+            - { title: "Geräteverleih", titleRoute: "index", staticTop: true, isFluid: false, inverse: false, template:RentBundle:Menu:navbar.html.twig }
         tags:
             - { name: mopa_bootstrap.navbar, alias: navbar }
+
+    UniHalle.twig.ceil_extension:
+        class: UniHalle\RentBundle\Twig\CeilExtension
+        tags:
+            - { name: twig.extension }

@@ -96,14 +96,14 @@ class BookingController extends Controller
         $endDisplay = clone $startDisplay;
         $intervalDay = new \DateInterval('P1D');
         $intervalDay->invert = 1;
-        $endDisplay->add(new \DateInterval('P9M'))->add($intervalDay);
+        $endDisplay->add(new \DateInterval('P8M'))->add($intervalDay);
 
         $nextDisplay = clone $endDisplay;
         $nextDisplay->add(new \DateInterval('P1D'));
 
         if ($startDisplay > new \DateTime('first day of this month 00:00:00')) {
             $prevDisplay = clone $startDisplay;
-            $intervalNineMonths = new \DateInterval('P9M');
+            $intervalNineMonths = new \DateInterval('P8M');
             $intervalNineMonths->invert = -1;
             $prevDisplay->add($intervalNineMonths);
         } else {
@@ -156,7 +156,7 @@ class BookingController extends Controller
                 $em->flush();
                 $this->get('session')->getFlashBag()->add(
                     'success',
-                    $this->get('translator')->trans('Buchung wurde vorläufig angenommen.')
+                    $this->get('translator')->trans('Ihre Buchung wurde vorläufig angenommen. Sobald ihre Buchung genehmigt wurde, erhalten Sie eine Benachrichtigung per E-Mail.')
                 );
 
                 return $this->redirect($this->generateUrl('booking_index'));

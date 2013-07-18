@@ -3,10 +3,21 @@
 {% block headline %}"{{ device.name }}" ausleihen{% endblock %}
 
 {% block content %}
-	<p class="lead">
-		Beginn der Entleihung: {{ startDateObj|date('d.m.Y') }}<br />
-		Ende der Entleihung: {{ endDateObj|date('d.m.Y') }}<br />
-	</p>
+	<div class="wel2l">
+		<p class="lead">
+			Sie möchten das Gerät <b>{{ device.name }}</b> ausleihen.<br />
+		</p>
+
+		<p>
+			Bitte beachten Sie, dass die Buchung <span class="text-warning">vorläufig</span> ist.<br />
+			Sobald die Buchung genehmigt wurde, erhalten sie eine Benachrichtigung per E-Mail.
+		</p>
+
+		<p>
+			Beginn der Entleihung: <span class="text-info">{{ startDateObj|date('d.m.Y') }}</span><br />
+			Ende der Entleihung: <span class="text-info">{{ endDateObj|date('d.m.Y') }}</span><br />
+		</p>
+	</div>
 
 	<form action="{{ path('booking_new', {'device_id': device.id}) }}" method="post" {{ form_enctype(form) }} class="form-horizontal">
 		<div class="hidden">

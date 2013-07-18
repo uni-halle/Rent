@@ -4,9 +4,9 @@
 
 {% block content %}
 	{% if dateToChoose == 'start' %}
-		<div class="alert alert-info">Bitte wählen Sie den gewünschten Beginn Ihrer Entleihung</div>
+		<div class="alert alert-info">Bitte wählen Sie den gewünschten Beginn Ihrer Entleihung.</div>
 	{% elseif dateToChoose == 'end' %}
-		<div class="alert alert-info">Bitte wählen Sie das gewünschte Ende Ihrer Entleihung</div>
+		<div class="alert alert-info">Bitte wählen Sie das gewünschte Ende Ihrer Entleihung.</div>
 		<p class="lead">
 			Beginn der Entleihung: {{ startDateObj|date('d.m.Y') }}
 		</p>
@@ -16,8 +16,8 @@
 
 	<div class="clearfix">
 	{% if prevDisplayDate %}
-		<a href="{{ path('booking_new', { 'device_id': device.id, 'start_date': startDate, 'start_display': prevDisplayDate|date('Y-m') }) }}" class="btn pull-left">zurück</a>
+		<a href="{{ path('booking_new', { 'device_id': device.id, 'start_date': startDate, 'start_display': prevDisplayDate|date('Y-m') }) }}" class="btn pull-left"><i class="icon-arrow-left"></i> Frühere Buchung</a>
 	{% endif %}
-	<a href="{{ path('booking_new', { 'device_id': device.id, 'start_date': startDate, 'start_display': nextDisplayDate|date('Y-m') }) }}" class="btn pull-right">weiter</a>
+	<a href="{{ path('booking_new', { 'device_id': device.id, 'start_date': startDate, 'start_display': nextDisplayDate|date('Y-m') }) }}" class="btn pull-right">Spätere Buchung <i class="icon-arrow-right"></i></a>
 	</div>
 {% endblock %}

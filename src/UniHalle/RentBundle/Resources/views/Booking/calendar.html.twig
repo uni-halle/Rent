@@ -1,5 +1,6 @@
 <div class="calendar">
 {% for month in dates %}
+	<div class="calendar-sheet">
 		<table class="calendar">
 			<thead>
 				<tr>
@@ -44,7 +45,13 @@
 					{% endif %}
 				{% endfor %}
 				</tr>
+				{% if ((month.prepend + month.dates|length)/7)|ceil < 6 %}
+					{% for i in range(((month.prepend + month.dates|length)/7)|ceil, 5) %}
+						<tr><td>&nbsp;</td></tr>
+					{% endfor %}
+				{% endif %}
 			</tbody>
 		</table>
+	</div>
 {% endfor %}
 </div>
