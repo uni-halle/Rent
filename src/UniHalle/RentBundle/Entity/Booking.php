@@ -6,6 +6,7 @@ use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Validator\Constraints as Assert;
 use Fresh\Bundle\DoctrineEnumBundle\Validator\Constraints as DoctrineAssert;
 use UniHalle\RentBundle\Types\BookingStatusType;
+use UniHalle\RentBundle\Helper\BookingHelper;
 
 /**
  * @ORM\Entity(repositoryClass="UniHalle\RentBundle\Repository\BookingRepository")
@@ -41,6 +42,11 @@ class Booking
      * @ORM\Column(type="date")
      */
     private $dateTo;
+
+    /**
+     * @ORM\Column(type="date")
+     */
+    private $dateBlockedUntil;
 
     /**
      * @DoctrineAssert\Enum(entity="UniHalle\RentBundle\Types\BookingStatusType")
@@ -101,6 +107,9 @@ class Booking
     {
         $this->dateTo = $dateTo;
 
+        $bookingHelper = new BookingHelper();
+        $this->setDateBlockedUntil($bookingHelper->calcBookedUntil($dateTo));
+
         return $this;
     }
 
@@ -112,6 +121,29 @@ class Booking
     public function getDateTo()
     {
         return $this->dateTo;
+    }
+
+    /**
+     * Set dateBlockedUntil
+     *
+     * @param \DateTime $dateBlockedUntil
+     * @return Booking
+     */
+    public function setDateBlockedUntil($dateBlockedUntil)
+    {
+        $this->dateBlockedUntil = $dateBlockedUntil;
+
+        return $this;
+    }
+
+    /**
+     * Get dateBlockedUntil
+     *
+     * @return \DateTime
+     */
+    public function getDateBlockedUntil()
+    {
+        return $this->dateBlockedUntil;
     }
 
     /**
@@ -135,26 +167,6 @@ class Booking
     public function getStatus()
     {
         return $this->status;
-    }
-
-    /**
-     * Get date after return and blocking period
-     * skip weekends and holidays
-     *
-     * @todo: check holidays
-     * @return \DateTime
-     */
-    public function getDateNextAvailable($blockingPeriod) {
-        $nextAvailable = clone $this->getDateTo();
-        while ($blockingPeriod > 0) {
-            if ($nextAvailable->format('N') >= 6) {
-                $nextAvailable->add(new \DateInterval('P2D'));
-                continue;
-            }
-            $nextAvailable->add(new \DateInterval('P1D'));
-            $blockingPeriod--;
-        }
-        return $nextAvailable;
     }
 
     /**

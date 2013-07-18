@@ -41,9 +41,11 @@ class BookingController extends Controller
     /**
      * @Route("/{id}", name="booking_show", requirements={"id"="\d+"})
      * @Secure(roles="ROLE_USER")
+     * @todo enable user check
      */
     public function showAction($id)
     {
+        $securityContext = $this->get('security.context');
         $em = $this->getDoctrine()->getManager();
         $booking = $em->getRepository('RentBundle:Booking')
                       ->findOneById($id);
@@ -52,7 +54,7 @@ class BookingController extends Controller
             throw $this->createNotFoundException('Buchung wurde nicht gefunden.');
         }
 
-        if (!$this->currentUserCanEditBooking($booking)) {
+        if (false /*$booking->getUser()->getId() != $securityContext->getToken()->getUser()->getId()*/) {
             throw new AccessDeniedHttpException('Sie dürfen diese Buchung nicht einsehen.');
         }
 
@@ -66,9 +68,6 @@ class BookingController extends Controller
      * @Route("/new/{device_id}/{start_display}/{start_date}/{end_date}", name="booking_new")
      * @Secure(roles="ROLE_USER")
      * @todo: set correct user
-     * @todo: check if there is another booking in this time
-     * @todo: check holidays
-     * @todo: check dates on store
      * @todo: send email to user and admin
      */
     public function newAction(Request $request, $device_id, $start_display = null, $start_date = null, $end_date = null)
@@ -131,6 +130,11 @@ class BookingController extends Controller
                     'error',
                     $this->get('translator')->trans('Die Rückgabe kann nicht vor Beginn der Entleihung erfolgen.')
                 );
+            } elseif ($em->getRepository('RentBundle:Booking')->bookingExistsInPeriod($device_id, $startDateObj, $endDateObj)) {
+                $this->get('session')->getFlashBag()->add(
+                    'error',
+                    $this->get('translator')->trans('In diesem Zeitraum liegt bereits eine Buchung.')
+                );
             } else {
                 $booking->setDateFrom($startDateObj);
                 $booking->setDateTo($endDateObj);
@@ -150,7 +154,10 @@ class BookingController extends Controller
 
         if ($request->isMethod('POST')) {
             $form->bind($request);
-            if ($form->isValid()) {
+
+            if (($booking->getDateFrom() <= $booking->getDateTo()) &&
+                    !$em->getRepository('RentBundle:Booking')->bookingExistsInPeriod($device_id, $booking->getDateFrom(), $booking->getDateTo()) &&
+                    $form->isValid()) {
                 $booking->setStatus(BookingStatusType::PRELIMINARY);
                 $em->persist($booking);
                 $em->flush();
@@ -160,6 +167,11 @@ class BookingController extends Controller
                 );
 
                 return $this->redirect($this->generateUrl('booking_index'));
+            } else {
+                $this->get('session')->getFlashBag()->add(
+                    'error',
+                    $this->get('translator')->trans('Ein Fehler ist bei der Bearbeitung ihrer Buchung aufgetreten.')
+                );
             }
         }
 
@@ -182,7 +194,6 @@ class BookingController extends Controller
      * @Route("/update/{id}", name="booking_update")
      * @Secure(roles="ROLE_ADMIN")
      * @todo: inform user
-     * @todo: check date
      */
     public function updateAction(Request $request, $id)
     {
@@ -197,13 +208,20 @@ class BookingController extends Controller
 
         if ($request->isMethod('POST')) {
             $form->bind($request);
-            if ($form->isValid()) {
+            if (($booking->getDateFrom() <= $booking->getDateTo()) &&
+                    !$em->getRepository('RentBundle:Booking')->bookingExistsInPeriod($booking->getDevice()->getId(), $booking->getDateFrom(), $booking->getDateTo(), $booking) &&
+                    $form->isValid()) {
                 $em->flush();
                 $this->get('session')->getFlashBag()->add(
                     'success',
                     $this->get('translator')->trans('Buchung wurde aktualisiert')
                 );
                 return $this->redirect($this->generateUrl('booking_index'));
+            } else {
+                $this->get('session')->getFlashBag()->add(
+                    'error',
+                    $this->get('translator')->trans('Eine Buchung kann in diesem Zeitraum nicht durchgeführt werden.')
+                );
             }
         }
 
@@ -333,34 +351,11 @@ class BookingController extends Controller
         );
     }
 
-    /**
-     * @todo: implement correctly
-     */
-    private function currentUserCanEditBooking($booking)
-    {
-        return true;
-        /*
-        $securityContext = $this->get('security.context');
-
-        if ($securityContext->isGranted('ROLE_ADMIN')) {
-            return true;
-        }
-
-        $user = $this->getDoctrine()->getManager()->getRepository('RentBundle:User')
-                     ->getUser($securityContext->getToken()->getUser()->getUsername());
-
-        if ($rent->getUser()->getId() == $user->getId()) {
-            return true;
-        }
-
-        return false;
-        */
-    }
-
     private function getMonthsArray($startDate, $endDate, $device_id)
     {
-        $blockingPeriod = $this->container->getParameter('blocking_period');
-        $currentBookings = $this->getDoctrine()->getManager()->getRepository('RentBundle:Booking')->getCurrentBookings($device_id, $blockingPeriod);
+        $em = $this->getDoctrine()->getManager();
+        $currentBookings = $em->getRepository('RentBundle:Booking')->getCurrentBookings($device_id);
+        $holidays = $em->getRepository('RentBundle:Configuration')->getHolidays();
 
         $currentDate = clone $startDate;
         $dates = array();
@@ -372,7 +367,7 @@ class BookingController extends Controller
         do {
             $booked = 0;
             foreach ($currentBookings as $b) {
-                if ($b->getDateFrom() <= $currentDate && $b->getDateNextAvailable($blockingPeriod) > $currentDate) {
+                if ($b->getDateFrom() <= $currentDate && $b->getDateBlockedUntil() >= $currentDate) {
                     $booked = 1;
                 }
             }
@@ -388,7 +383,7 @@ class BookingController extends Controller
 
             $month['dates'][] = array(
                 'date'    => clone $currentDate,
-                'class'   => ($currentDate->format('N') >= 6) ? 'weekend' : ($booked ? 'booked' : 'free')
+                'class'   => ($currentDate->format('N') >= 6 || in_array($currentDate, $holidays)) ? 'weekend' : ($booked ? 'booked' : 'free')
             );
             $currentDate->add(new \DateInterval('P1D'));
         } while ($month['dates'][count($month['dates'])-1]['date'] < $endDate);

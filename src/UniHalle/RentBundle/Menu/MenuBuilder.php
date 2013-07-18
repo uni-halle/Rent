@@ -25,6 +25,7 @@ class MenuBuilder extends AbstractNavbarMenuBuilder
         }
         if ($this->security->isGranted('ROLE_ADMIN')) {
             $menu->addChild('Inhalte', array('route' => 'site_index'));
+            $menu->addChild('Konfiguration', array('route' => 'configuration_index'));
         }
         return $menu;
     }
