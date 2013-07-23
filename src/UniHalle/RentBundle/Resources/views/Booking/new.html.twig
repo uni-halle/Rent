@@ -12,7 +12,13 @@
 		</p>
 	{% endif %}
 
-	{% include 'RentBundle:Booking:calendar.html.twig' with {'dates': dates, 'device': device, 'start_display': start_display, 'dateToChoose': dateToChoose, 'startDateObj': startDateObj} %}
+	{% include 'RentBundle:Booking:calendar.html.twig' with {
+		'dates': dates,
+		'device': device,
+		'start_display': start_display,
+		'dateToChoose': dateToChoose,
+		'startDateObj': startDateObj
+	} %}
 
 	<div class="clearfix">
 	{% if prevDisplayDate %}
@@ -20,4 +26,13 @@
 	{% endif %}
 	<a href="{{ path('booking_new', { 'device_id': device.id, 'start_date': startDate, 'start_display': nextDisplayDate|date('Y-m') }) }}" class="btn pull-right">Spätere Buchung <i class="icon-arrow-right"></i></a>
 	</div>
+
+	<script type="text/javascript">
+		var dateToChoose = '{{ dateToChoose }}';
+		{% if dateToChoose == 'end' %}
+		var startDate = {{ startDateObj|date('U') }};
+		{% else %}
+		var startDate = 0;
+		{% endif %}
+	</script>
 {% endblock %}

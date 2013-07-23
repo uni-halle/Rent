@@ -154,6 +154,10 @@ table.calendar td a {
     color: #333333;
 }
 
+table.calendar td.active {
+    background-color: #FCF8E3;
+}
+
 /** BOX **/
 
 .box {

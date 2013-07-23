@@ -20,11 +20,11 @@
 				<tr>
 				{% if month.prepend > 0 %}
 				{% for i in range(0, month.prepend-1) %}
-					<td></td>
+					<td data-date="0"></td>
 				{% endfor %}
 				{% endif %}
 				{% for day in month.dates %}
-					<td class="{{ day.class }}">
+					<td class="{{ day.class }} {% if day.date == startDateObj %}active{% endif %}" data-date="{{ day.date|date('U') }}">
 						{% if day.class == 'free' %}
 							{% if dateToChoose == 'start' %}
 								<a href="{{ path('booking_new', {'device_id': device.id,
@@ -47,7 +47,7 @@
 				</tr>
 				{% if ((month.prepend + month.dates|length)/7)|ceil < 6 %}
 					{% for i in range(((month.prepend + month.dates|length)/7)|ceil, 5) %}
-						<tr><td>&nbsp;</td></tr>
+						<tr><td data-date="0">&nbsp;</td></tr>
 					{% endfor %}
 				{% endif %}
 			</tbody>
