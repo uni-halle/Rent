@@ -19,13 +19,14 @@ class MenuBuilder extends AbstractNavbarMenuBuilder
     {
         $menu = $this->createNavbarMenuItem();
 
-        if ($this->security->isGranted('ROLE_USER')) {
+        if ($this->security->isGranted('ROLE_ADMIN')) {
             $menu->addChild('Geräte', array('route' => 'category_index'));
             $menu->addChild('Buchungen', array('route' => 'booking_index'));
-        }
-        if ($this->security->isGranted('ROLE_ADMIN')) {
             $menu->addChild('Inhalte', array('route' => 'site_index'));
             $menu->addChild('Konfiguration', array('route' => 'configuration_index'));
+        } else if ($this->security->isGranted('ROLE_USER')) {
+            $menu->addChild('Geräte', array('route' => 'category_index'));
+            $menu->addChild('Meine Buchungen', array('route' => 'booking_index'));
         }
         return $menu;
     }
