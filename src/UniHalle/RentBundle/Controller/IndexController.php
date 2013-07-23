@@ -24,7 +24,17 @@ class IndexController extends Controller
         if (!$site) {
             throw $this->createNotFoundException('Seite wurde nicht gefunden.');
         }
+        $contact = $em->getRepository('RentBundle:Site')
+                      ->findOneByIdentifier('indexContact');
+        if (!$contact) {
+            throw $this->createNotFoundException('Kontaktdaten wurden nicht gefunden.');
+        }
 
-        return $this->render('RentBundle:Site:show.html.twig', array( 'site'  => $site ));
+        return $this->render('RentBundle:Index:index.html.twig',
+            array(
+                'site'    => $site,
+                'contact' => $contact
+            )
+        );
     }
 }

@@ -1,0 +1,18 @@
+{% extends 'RentBundle::base.html.twig' %}
+{% from 'MopaBootstrapBundle::flash.html.twig' import flash %}
+
+{% block headline %}ITZ Geräteverleih{% endblock %}
+
+{% block content %}
+	<div>
+		<div class="span8">
+			{{ site.content|raw }}
+		</div>
+		<div class="span4">
+			<div class="box">
+				<header class="box-header"><h5>Kontakt</h5></header>
+				{{ contact.content|raw }}
+			</div>
+		</div>
+	</div>
+{% endblock %}
