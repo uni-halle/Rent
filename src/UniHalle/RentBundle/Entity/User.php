@@ -26,7 +26,12 @@ class User
     /**
      * @ORM\Column(type="string", length=255)
      */
-    private $commonName;
+    private $name;
+
+    /**
+     * @ORM\Column(type="string", length=255)
+     */
+    private $surname;
 
     /**
      * @ORM\Column(type="string", length=255)
@@ -95,26 +100,49 @@ class User
     }
 
     /**
-     * Set commonName
+     * Set surname
      *
-     * @param string $commonName
+     * @param string $surname
      * @return User
      */
-    public function setCommonName($commonName)
+    public function setSurname($surname)
     {
-        $this->commonName = $commonName;
+        $this->surname = $surname;
 
         return $this;
     }
 
     /**
-     * Get commonName
+     * Get surname
      *
      * @return string
      */
-    public function getCommonName()
+    public function getSurname()
     {
-        return $this->commonName;
+        return $this->surname;
+    }
+
+    /**
+     * Set name
+     *
+     * @param string $name
+     * @return User
+     */
+    public function setName($name)
+    {
+        $this->name = $name;
+
+        return $this;
+    }
+
+    /**
+     * Get name
+     *
+     * @return string
+     */
+    public function getName()
+    {
+        return $this->name;
     }
 
     /**
@@ -125,7 +153,7 @@ class User
      */
     public function setMail($mail)
     {
-        $this->mail = $mail;
+        $this->email = $mail;
 
         return $this;
     }
@@ -137,7 +165,7 @@ class User
      */
     public function getMail()
     {
-        return $this->mail;
+        return $this->email;
     }
 
     /**

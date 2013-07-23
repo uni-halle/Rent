@@ -4,6 +4,7 @@ namespace UniHalle\RentBundle\Controller;
 
 use UniHalle\RentBundle\Entity\Device;
 use UniHalle\RentBundle\Entity\Booking;
+use UniHalle\RentBundle\Entity\Configuration;
 use UniHalle\RentBundle\Form\Type\BookingType;
 use UniHalle\RentBundle\Types\BookingStatusType;
 use JMS\SecurityExtraBundle\Annotation\Secure;
@@ -68,7 +69,6 @@ class BookingController extends Controller
      * @Route("/new/{device_id}/{start_display}/{start_date}/{end_date}", name="booking_new")
      * @Secure(roles="ROLE_USER")
      * @todo: set correct user
-     * @todo: send email to user and admin
      */
     public function newAction(Request $request, $device_id, $start_display = null, $start_date = null, $end_date = null)
     {
@@ -161,6 +161,9 @@ class BookingController extends Controller
                 $booking->setStatus(BookingStatusType::PRELIMINARY);
                 $em->persist($booking);
                 $em->flush();
+
+                $this->get('mailer')->send($this->getBookingMessage($booking->getId()));
+
                 $this->get('session')->getFlashBag()->add(
                     'success',
                     $this->get('translator')->trans('Ihre Buchung wurde vorläufig angenommen. Sobald ihre Buchung genehmigt wurde, erhalten Sie eine Benachrichtigung per E-Mail.')
@@ -193,7 +196,6 @@ class BookingController extends Controller
     /**
      * @Route("/update/{id}", name="booking_update")
      * @Secure(roles="ROLE_ADMIN")
-     * @todo: inform user
      */
     public function updateAction(Request $request, $id)
     {
@@ -212,6 +214,9 @@ class BookingController extends Controller
                     !$em->getRepository('RentBundle:Booking')->bookingExistsInPeriod($booking->getDevice()->getId(), $booking->getDateFrom(), $booking->getDateTo(), $booking) &&
                     $form->isValid()) {
                 $em->flush();
+
+                $this->get('mailer')->send($this->getBookingMessage($booking->getId()), true);
+
                 $this->get('session')->getFlashBag()->add(
                     'success',
                     $this->get('translator')->trans('Buchung wurde aktualisiert')
@@ -237,7 +242,6 @@ class BookingController extends Controller
     /**
      * @Route("/delete/{id}", name="booking_delete")
      * @Secure(roles="ROLE_ADMIN")
-     * @todo: inform user
      */
     public function deleteAction(Request $request, $id)
     {
@@ -268,7 +272,6 @@ class BookingController extends Controller
     /**
      * @Route("/status/{id}/{status}", name="booking_status")
      * @Secure(roles="ROLE_ADMIN")
-     * @todo: send mail to user
      */
     public function statusAction($id, $status)
     {
@@ -281,9 +284,11 @@ class BookingController extends Controller
         switch ($status) {
             case 'approved':
                 $booking->setStatus(BookingStatusType::APPROVED);
+                $this->get('mailer')->send($this->getBookingMessage($booking->getId()));
                 break;
             case 'canceled':
                 $booking->setStatus(BookingStatusType::CANCELED);
+                $this->get('mailer')->send($this->getBookingMessage($booking->getId()));
                 break;
             case 'inRent':
                 $booking->setStatus(BookingStatusType::IN_RENT);
@@ -390,5 +395,55 @@ class BookingController extends Controller
         $dates[] = $month;
 
         return $dates;
+    }
+
+    private function getBookingMessage($bookingId, $updated = false)
+    {
+        $em = $this->getDoctrine()->getManager();
+
+        $config = $em->getRepository('RentBundle:Configuration');
+
+        $booking = $em->getRepository('RentBundle:Booking')->findOneById($bookingId);
+        if (!$booking) {
+            throw $this->createNotFoundException('Buchung wurde nicht gefunden.');
+        }
+
+        $mail = null;
+        $to = '';
+        if ($updated) {
+            $mail = $em->getRepository('RentBundle:Site')->findOneByIdentifier('mailRentalUpdated');
+            $to = $booking->getUser()->getMail();
+        } else if ($booking->getStatus() == BookingStatusType::APPROVED) {
+            $mail = $em->getRepository('RentBundle:Site')->findOneByIdentifier('mailRentalAccpeted');
+            $to = $booking->getUser()->getMail();
+        } else if ($booking->getStatus() == BookingStatusType::CANCELED) {
+            $mail = $em->getRepository('RentBundle:Site')->findOneByIdentifier('mailRentalDenied');
+            $to = $booking->getUser()->getMail();
+        } else if ($booking->getStatus() == BookingStatusType::PRELIMINARY) {
+            $mail = $em->getRepository('RentBundle:Site')->findOneByIdentifier('mailNewRent');
+            $to = $config->getValue('adminMail');
+        }
+
+        if (!$mail) {
+            throw $this->createNotFoundException('E-Mail Inhalt wurde nicht gefunden.');
+        }
+
+        $subject = $mail->getSubject();
+
+        $content = $mail->getContent();
+        $content = str_replace('{USER.SURNAME}', $booking->getUser()->getSurname(), $content);
+        $content = str_replace('{USER.NAME}', $booking->getUser()->getName(), $content);
+        $content = str_replace('{USER.MAIL}', $booking->getUser()->getMail(), $content);
+        $content = str_replace('{DATE.NOW}', date('d.m.Y'), $content);
+        $content = str_replace('{DATE.START}', $booking->getDateFrom()->format('d.m.Y'), $content);
+        $content = str_replace('{DATE.END}', $booking->getDateTo()->format('d.m.Y'), $content);
+        $content = str_replace('{DEVICE.NAME}', $booking->getDevice()->getName(), $content);
+        $content = str_replace('{DEVICE.SERIAL_NUMBER}', $booking->getDevice()->getSerialNumber(), $content);
+
+        $message = \Swift_Message::newInstance()->setSubject($mail->getSubject())
+                                                ->setFrom($config->getValue('mailSender'))
+                                                ->setTo($to)
+                                                ->setBody($content);
+        return $message;
     }
 }

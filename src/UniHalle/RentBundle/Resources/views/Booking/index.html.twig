@@ -26,7 +26,7 @@
 			{% for booking in bookings %}
 				<tr>
 					{% if is_granted('ROLE_ADMIN') %}
-						<td>{{ booking.user.commonName }}</td>
+						<td>{{ booking.user.surname }}, {{ booking.user.name }}</td>
 					{% endif %}
 					<td><a href="{{ path('device_show', {'id': booking.device.id}) }}">{{ booking.device.name }}</a></td>
 					<td>{{ booking.dateFrom|date('d.m.Y') }}</td>

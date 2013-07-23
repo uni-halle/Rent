@@ -82,6 +82,13 @@ class LoadSites extends AbstractFixture implements OrderedFixtureInterface
         $this->addRentMailPlaceholders($mailRentalExtendDenied);
         $sites[] = $mailRentalExtendDenied;
 
+        $mailRentalUpdated = new Site();
+        $mailRentalUpdated->setName('Buchungsdaten geändert');
+        $mailRentalUpdated->setIdentifier('mailRentalUpdated');
+        $mailRentalUpdated->setType(SiteType::USER_MAIL);
+        $this->addRentMailPlaceholders($mailRentalUpdated);
+        $sites[] = $mailRentalUpdated;
+
         $mailAdminNewUser = new Site();
         $mailAdminNewUser->setName('Nutzer: Registrierung');
         $mailAdminNewUser->setIdentifier('mailUserRegistered');
