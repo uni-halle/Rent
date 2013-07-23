@@ -58,4 +58,38 @@ class BookingRepository extends EntityRepository
 
         return ($query->getSingleScalarResult() > 0);
     }
+
+    public function getBookings($userId, $deviceId, $time)
+    {
+        $userQuery = ($userId != 0) ? ' AND b.user='.(int)$userId : '';
+        $deviceQuery = ($deviceId != 0) ? ' AND b.device='.(int)$deviceId : '';
+
+        if ($time == 'now') {
+            $query = $this->getEntityManager()
+                          ->createQuery(
+                              'SELECT b FROM RentBundle:Booking b
+                               LEFT JOIN b.device d
+                               LEFT JOIN b.user u
+                               WHERE
+                                   (b.dateFrom>=CURRENT_DATE() OR
+                                   (b.dateFrom<=CURRENT_DATE() AND b.dateTo>=CURRENT_DATE()))
+                                   '.$userQuery.'
+                                   '.$deviceQuery.'
+                               ORDER BY b.dateFrom'
+                          );
+        } else if ($time == 'past') {
+            $query = $this->getEntityManager()
+                          ->createQuery(
+                              'SELECT b FROM RentBundle:Booking b
+                               LEFT JOIN b.device d
+                               LEFT JOIN b.user u
+                               WHERE
+                                   b.dateTo<CURRENT_DATE()
+                                   '.$userQuery.'
+                                   '.$deviceQuery.'
+                               ORDER BY b.dateFrom'
+                          );
+        }
+        return $query;
+    }
 }

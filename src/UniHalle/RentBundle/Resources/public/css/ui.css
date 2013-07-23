@@ -16,6 +16,15 @@
     font-weight: normal;
 }
 
+.no-margin-bottom {
+    margin-bottom: 0;
+}
+
+th a, th a:hover {
+    color: #333333;
+    text-decoration: none;
+}
+
 /*** Login ***/
 
 .dropdown-menu-login {

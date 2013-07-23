@@ -26,7 +26,8 @@
         "knplabs/knp-menu": "dev-master",
         "fresh/doctrine-enum-bundle": "dev-master",
         "egeloen/ckeditor-bundle": "2.*",
-        "doctrine/doctrine-fixtures-bundle": "dev-master"
+        "doctrine/doctrine-fixtures-bundle": "dev-master",
+        "bmatzner/fontawesome-bundle": "*"
     },
     "scripts": {
         "post-install-cmd": [

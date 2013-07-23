@@ -1,83 +1,130 @@
 {% extends 'RentBundle::base.html.twig' %}
+{% from 'MopaBootstrapBundle::flash.html.twig' import flash %}
 
 {% block headline %}Buchungen{% endblock %}
 
 {% block content %}
 
-	<table class="table">
-		<thead>
-			<tr>
-				{% if is_granted('ROLE_ADMIN') %}
-				<th>Entleiher</th>
-				{% endif %}
-				<th>Gerät</th>
-				<th>Entleihdatum</th>
-				<th>Rückgabedatum</th>
-				{% if is_granted('ROLE_ADMIN') %}
-					<th>Bearbeiten</th>
-				{% endif %}
-				<th>Status</th>
-				{% if is_granted('ROLE_ADMIN') %}
-					<th>Dokumente</th>
-				{% endif %}
-			</tr>
-		</thead>
-		<tbody>
-			{% for booking in bookings %}
+	<div class="clearfix">
+		<ul class="nav nav-pills pull-left">
+	  		<li {% if time == 'now' %}class="active"{% endif %}>
+	    		<a href="{{ path('booking_index', {'time': 'now'}) }}">Aktuelle Buchungen</a>
+	  		</li>
+	  		<li {% if time == 'past' %}class="active"{% endif %}>
+	    		<a href="{{ path('booking_index', {'time': 'past'}) }}">Vergangene Buchungen</a>
+	  		</li>
+	  	</ul>
+
+	  	<form method="get" class="pull-right">
+		  	<select name="deviceId" class="no-margin-bottom">
+		  		<option value="0">Alle Geräte</option>
+		  		{% for device in devices %}
+		  			<option value="{{ device.id }}" {% if deviceId == device.id %}selected="selected"{% endif %}>{{ device.name }}</option>
+		  		{% endfor %}
+			</select>
+			<input type="submit" value="Anzeigen" class="btn" />
+		</form>
+	</div>
+
+  	{% if bookings|length == 0 %}
+  		{% if time == 'now' %}
+  			{{ flash('info', 'Es liegen keine aktuellen Buchungen vor.', false, false) }}
+  		{% elseif time == 'past' %}
+  			{{ flash('info', 'Es liegen keine vergangenen Buchungen vor.', false, false) }}
+  		{% endif %}
+  	{% else %}
+		<table class="table">
+			<thead>
 				<tr>
 					{% if is_granted('ROLE_ADMIN') %}
-						<td>{{ booking.user.surname }}, {{ booking.user.name }}</td>
+    				<th>
+    					{% if bookings.isSorted('u.surname') %}<i class="icon-sort-by-attributes{% if sortDirection == 'desc'%}-alt{% endif %}"></i>{% endif %}
+    					{{ knp_pagination_sortable(bookings, 'Entleiher', 'u.surname') }}
+    				</th>
 					{% endif %}
-					<td><a href="{{ path('device_show', {'id': booking.device.id}) }}">{{ booking.device.name }}</a></td>
-					<td>{{ booking.dateFrom|date('d.m.Y') }}</td>
-					<td>{{ booking.dateTo|date('d.m.Y') }}</td>
+    				<th>
+    					{% if bookings.isSorted('d.name') %}<i class="icon-sort-by-attributes{% if sortDirection == 'desc'%}-alt{% endif %}"></i>{% endif %}
+    					{{ knp_pagination_sortable(bookings, 'Gerät', 'd.name') }}
+    				</th>
+    				<th>
+    					{% if bookings.isSorted('b.dateFrom') %}<i class="icon-sort-by-attributes{% if sortDirection == 'desc'%}-alt{% endif %}"></i>{% endif %}
+    					{{ knp_pagination_sortable(bookings, 'Entleihdatum', 'b.dateFrom') }}
+    				</th>
+    				<th>
+    					{% if bookings.isSorted('b.dateTo') %}<i class="icon-sort-by-attributes{% if sortDirection == 'desc'%}-alt{% endif %}"></i>{% endif %}
+    					{{ knp_pagination_sortable(bookings, 'Rückgabedatum', 'b.dateTo') }}
+    				</th>
 					{% if is_granted('ROLE_ADMIN') %}
-						<td>
-							<a href="{{ path('booking_update', {'id': booking.id}) }}" class="btn btn-small"><i class="icon-pencil"></i> Bearbeiten</a>
-						</td>
-						<td>
-							<div class="btn-group">
-							  	<a class="btn dropdown-toggle btn-small {% if booking.status == 'preliminary' %}btn-info{% elseif booking.status == 'canceled' %}btn-warning{% elseif booking.status == 'gotBack' %}btn-success{% elseif booking.status == 'inRent' %}btn-danger{% endif %}" data-toggle="dropdown" href="#">
-							  	{{ booking.status|readable_enum_value('BookingStatusType') }}
-						    	<span class="caret"></span>
-							  	</a>
-							  	<ul class="dropdown-menu">
-							  		<li>
-							  			<a href="{{ path('booking_status', {'id': booking.id, 'status': 'preliminary'}) }}"><i class="icon-question-sign"></i> Vorläufige Buchung</a>
-							  		</li>
-							  		<li>
-							  			<a href="{{ path('booking_status', {'id': booking.id, 'status': 'approved'}) }}"><i class="icon-ok"></i> Genehmigte Buchung</a>
-							  		</li>
-							  		<li>
-							  			<a href="{{ path('booking_status', {'id': booking.id, 'status': 'canceled'}) }}"><i class="icon-remove"></i> Abgelehnte Buchung</a>
-							  		</li>
-							  		<li class="divider"></li>
-							  		<li>
-							  			<a href="{{ path('booking_status', {'id': booking.id, 'status': 'inRent'}) }}"><i class="icon-hand-right"></i> Gerät ausgeliehen</a>
-							  		</li>
-							  		<li>
-							  			<a href="{{ path('booking_status', {'id': booking.id, 'status': 'gotBack'}) }}"><i class="icon-hand-left"></i> Gerät zurückerhalten</a>
-							  		</li>
-								</ul>
-							</div>
-						</td>
-						<td>
-							{% if booking.status == 'inRent' %}
-								<a href="{{ path('booking_document', {'bookingId': booking.id, 'docIdentifier': 'docRent'}) }}" target="_blank" class="btn btn-small"><i class="icon-download"></i> Leihschein</a>
-							{% elseif booking.status == 'gotBack' %}
-								<a href="{{ path('booking_document', {'bookingId': booking.id, 'docIdentifier': 'docRentBack'}) }}" target="_blank" class="btn btn-small"><i class="icon-download"></i> Rückgabeschein</a>
-							{% endif %}
-						</td>
-					{% elseif is_granted('ROLE_USER') %}
-						<td>
-							<span class="label {% if booking.status == 'preliminary' %}label-info{% elseif booking.status == 'canceled' %}label-important{% elseif booking.status == 'gotBack' %}label-success{% elseif booking.status == 'inRent' %}label-warning{% endif %}">
-							{{ booking.status|readable_enum_value('BookingStatusType') }}
-							</span>
-						</td>
+						<th>Bearbeiten</th>
+					{% endif %}
+					<th>Status</th>
+					{% if is_granted('ROLE_ADMIN') %}
+						<th>Dokumente</th>
 					{% endif %}
 				</tr>
-			{% endfor %}
-		</tbody>
-	</table>
+			</thead>
+			<tbody>
+				{% for booking in bookings %}
+					<tr>
+						{% if is_granted('ROLE_ADMIN') %}
+							<td>{{ booking.user.surname }}, {{ booking.user.name }}</td>
+						{% endif %}
+						<td><a href="{{ path('device_show', {'id': booking.device.id}) }}">{{ booking.device.name }}</a></td>
+						<td>{{ booking.dateFrom|date('d.m.Y') }}</td>
+						<td>{{ booking.dateTo|date('d.m.Y') }}</td>
+						{% if is_granted('ROLE_ADMIN') %}
+							<td>
+								<a href="{{ path('booking_update', {'id': booking.id}) }}" class="btn btn-small"><i class="icon-pencil"></i> Bearbeiten</a>
+							</td>
+							<td>
+								<div class="btn-group">
+								  	<a class="btn dropdown-toggle btn-small {% if booking.status == 'preliminary' %}btn-info{% elseif booking.status == 'canceled' %}btn-warning{% elseif booking.status == 'gotBack' %}btn-success{% elseif booking.status == 'inRent' %}btn-danger{% endif %}" data-toggle="dropdown" href="#">
+								  	{{ booking.status|readable_enum_value('BookingStatusType') }}
+							    	<span class="caret"></span>
+								  	</a>
+								  	<ul class="dropdown-menu">
+								  		<li>
+								  			<a href="{{ path('booking_status', {'id': booking.id, 'status': 'preliminary'}) }}"><i class="icon-question-sign"></i> Vorläufige Buchung</a>
+								  		</li>
+								  		<li>
+								  			<a href="{{ path('booking_status', {'id': booking.id, 'status': 'approved'}) }}"><i class="icon-ok"></i> Genehmigte Buchung</a>
+								  		</li>
+								  		<li>
+								  			<a href="{{ path('booking_status', {'id': booking.id, 'status': 'canceled'}) }}"><i class="icon-remove"></i> Abgelehnte Buchung</a>
+								  		</li>
+								  		<li class="divider"></li>
+								  		<li>
+								  			<a href="{{ path('booking_status', {'id': booking.id, 'status': 'inRent'}) }}"><i class="icon-hand-right"></i> Gerät ausgeliehen</a>
+								  		</li>
+								  		<li>
+								  			<a href="{{ path('booking_status', {'id': booking.id, 'status': 'gotBack'}) }}"><i class="icon-hand-left"></i> Gerät zurückerhalten</a>
+								  		</li>
+									</ul>
+								</div>
+							</td>
+							<td>
+								{% if booking.status == 'inRent' %}
+									<a href="{{ path('booking_document', {'bookingId': booking.id, 'docIdentifier': 'docRent'}) }}" target="_blank" class="btn btn-small"><i class="icon-download"></i> Leihschein</a>
+								{% elseif booking.status == 'gotBack' %}
+									<a href="{{ path('booking_document', {'bookingId': booking.id, 'docIdentifier': 'docRentBack'}) }}" target="_blank" class="btn btn-small"><i class="icon-download"></i> Rückgabeschein</a>
+								{% endif %}
+							</td>
+						{% elseif is_granted('ROLE_USER') %}
+							<td>
+								<span class="label {% if booking.status == 'preliminary' %}label-info{% elseif booking.status == 'canceled' %}label-important{% elseif booking.status == 'gotBack' %}label-success{% elseif booking.status == 'inRent' %}label-warning{% endif %}">
+								{{ booking.status|readable_enum_value('BookingStatusType') }}
+								</span>
+							</td>
+						{% endif %}
+					</tr>
+				{% endfor %}
+			</tbody>
+		</table>
+
+		<div class="navigation text-center">
+	    	{{ knp_pagination_render(bookings) }}
+		</div>
+
+  	{% endif %}
 
 {% endblock %}

@@ -18,24 +18,55 @@ use Symfony\Component\HttpFoundation\Response;
  */
 class BookingController extends Controller
 {
+    const BOOKINGS_PER_PAGE = 15;
+
     /**
-     * @Route("/", name="booking_index")
+     * @Route("/{time}", name="booking_index", requirements={"time" = "now|past"})
      * @Secure(roles="ROLE_USER")
-     * @todo: switch user/admin: show bookings by user/all
-     * @todo: use pagination
+     * @todo: set correct user
      */
-    public function indexAction()
+    public function indexAction(Request $request, $time = 'now')
     {
+        $securityContext = $this->get('security.context');
+        if ($securityContext->isGranted('ROLE_ADMIN')) {
+            $userId = 0;
+        } else {
+            $userId = 1;
+        }
+
         $em = $this->getDoctrine()->getManager();
-        $bookings = $em->getRepository('RentBundle:Booking')
-                       ->findBy(
-                           array(),
-                           array('dateFrom' => 'ASC')
-                       );
+
+        $deviceId =$request->get('deviceId', 0);
+        $devices = $em->getRepository('RentBundle:Device')->findBy(
+            array(),
+            array(
+                'name' => 'ASC'
+            )
+        );
+
+        $bookingsQuery = $em->getRepository('RentBundle:Booking')->getBookings($userId, $deviceId, $time);
+
+        $paginator  = $this->get('knp_paginator');
+        $pagination = $paginator->paginate(
+            $bookingsQuery,
+            $request->get('page', 1),
+            BookingController::BOOKINGS_PER_PAGE
+        );
+
+        if (!$request->get('sort') && !$request->get('direction')) {
+            $pagination->setParam('sort', 'b.dateFrom');
+            $pagination->setParam('direction', 'asc');
+        }
 
         return $this->render(
             'RentBundle:Booking:index.html.twig',
-            array('bookings' => $bookings)
+            array(
+                'devices'       => $devices,
+                'deviceId'      => $deviceId,
+                'bookings'      => $pagination,
+                'time'          => $time,
+                'sortDirection' => $request->get('direction', 'asc')
+            )
         );
     }
 

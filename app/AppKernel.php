@@ -27,6 +27,7 @@ class AppKernel extends Kernel
             new UniHalle\RentBundle\RentBundle(),
             new Fresh\Bundle\DoctrineEnumBundle\FreshDoctrineEnumBundle(),
             new Ivory\CKEditorBundle\IvoryCKEditorBundle(),
+            new Bmatzner\FontAwesomeBundle\BmatznerFontAwesomeBundle(),
         );
 
         if (in_array($this->getEnvironment(), array('dev', 'test'))) {
