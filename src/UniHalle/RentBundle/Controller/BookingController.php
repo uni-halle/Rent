@@ -317,42 +317,36 @@ class BookingController extends Controller
     }
 
     /**
-     * @Route("/inRentDoc/{id}", name="booking_inRentDoc")
+     * @Route("/document/{bookingId}/{docIdentifier}", name="booking_document")
      * @Secure(roles="ROLE_ADMIN")
-     * @todo: update template
      */
-    public function inRentDocAction($id)
+    public function documentAction($bookingId, $docIdentifier)
     {
         $em = $this->getDoctrine()->getManager();
         $booking = $em->getRepository('RentBundle:Booking')
-                      ->findOneById($id);
+                      ->findOneById($bookingId);
         if (!$booking) {
             throw $this->createNotFoundException('Buchung wurde nicht gefunden.');
         }
 
-        return $this->render(
-            'RentBundle:Booking:doc_inRent.html.twig',
-            array('booking' => $booking)
-        );
-    }
-
-    /**
-     * @Route("/gotBackDoc/{id}", name="booking_gotBackDoc")
-     * @Secure(roles="ROLE_ADMIN")
-     * @todo: update template
-     */
-    public function gotBackDocAction($id)
-    {
-        $em = $this->getDoctrine()->getManager();
-        $booking = $em->getRepository('RentBundle:Booking')
-                      ->findOneById($id);
-        if (!$booking) {
-            throw $this->createNotFoundException('Buchung wurde nicht gefunden.');
+        $document = $em->getRepository('RentBundle:Site')->findOneByIdentifier($docIdentifier);
+        if (!$document) {
+            throw $this->createNotFoundException('Dokument wurde nicht gefunden.');
         }
 
+        $content = $document->getContent();
+        $content = str_replace('{USER.SURNAME}', $booking->getUser()->getSurname(), $content);
+        $content = str_replace('{USER.NAME}', $booking->getUser()->getName(), $content);
+        $content = str_replace('{USER.MAIL}', $booking->getUser()->getMail(), $content);
+        $content = str_replace('{DATE.NOW}', date('d.m.Y'), $content);
+        $content = str_replace('{DATE.START}', $booking->getDateFrom()->format('d.m.Y'), $content);
+        $content = str_replace('{DATE.END}', $booking->getDateTo()->format('d.m.Y'), $content);
+        $content = str_replace('{DEVICE.NAME}', $booking->getDevice()->getName(), $content);
+        $content = str_replace('{DEVICE.SERIAL_NUMBER}', $booking->getDevice()->getSerialNumber(), $content);
+
         return $this->render(
-            'RentBundle:Booking:doc_gotBack.html.twig',
-            array('booking' => $booking)
+            'RentBundle:Booking:document.html.twig',
+            array('content' => $content)
         );
     }
 

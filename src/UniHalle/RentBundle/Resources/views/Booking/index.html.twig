@@ -63,9 +63,9 @@
 						</td>
 						<td>
 							{% if booking.status == 'inRent' %}
-								<a href="{{ path('booking_inRentDoc', {'id': booking.id}) }}" target="_blank" class="btn btn-small"><i class="icon-download"></i> Leihschein</a>
+								<a href="{{ path('booking_document', {'bookingId': booking.id, 'docIdentifier': 'docRent'}) }}" target="_blank" class="btn btn-small"><i class="icon-download"></i> Leihschein</a>
 							{% elseif booking.status == 'gotBack' %}
-								<a href="{{ path('booking_gotBackDoc', {'id': booking.id}) }}" target="_blank" class="btn btn-small"><i class="icon-download"></i> Rückgabeschein</a>
+								<a href="{{ path('booking_document', {'bookingId': booking.id, 'docIdentifier': 'docRentBack'}) }}" target="_blank" class="btn btn-small"><i class="icon-download"></i> Rückgabeschein</a>
 							{% endif %}
 						</td>
 					{% elseif is_granted('ROLE_USER') %}

@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8" />
+    {% stylesheets filter='less,yui_css'
+    	'@RentBundle/Resources/public/less/rent.less'
+    	'@MopaBootstrapBundle/Resources/bootstrap/less/responsive.less'
+    	'bundles/rent/css/bootstrap-chosen.min.css'
+    	'bundles/rent/css/ui.css'
+	%}
+    <link href="{{ asset_url }}" type="text/css" rel="stylesheet" media="screen" />
+    {% endstylesheets %}
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Geräteverleih</title>
+    <link rel="shortcut icon" href="{{ asset('favicon.ico') }}" />
+</head>
+
+<body data-spy="scroll">
+    <div class="container">
+    {{ content|raw }}
+    </div> <!-- /container -->
+</body>
+</html>
