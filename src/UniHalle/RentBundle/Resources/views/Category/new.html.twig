@@ -1,6 +1,6 @@
 {% extends 'RentBundle::base.html.twig' %}
 
-{% block headline %}Kategorie hinzufügen{% endblock %}
+{% block headline %}Geräteklasse hinzufügen{% endblock %}
 
 {% block content %}
 
@@ -8,7 +8,7 @@
 	{{ form_errors(form) }}
 	{{ form_widget(form) }}
 	<div class="form-actions">
-    	<input class="btn btn-primary" type="submit" value="Kategorie erstellen" />
+    	<input class="btn btn-primary" type="submit" value="Geräteklasse erstellen" />
 		<a href="{{ path('category_index') }}" class="btn">Abbrechen</a>
 	</div>
 </form>

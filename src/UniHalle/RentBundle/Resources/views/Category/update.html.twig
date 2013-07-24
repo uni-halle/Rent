@@ -1,6 +1,6 @@
 {% extends 'RentBundle::base.html.twig' %}
 
-{% block headline %}Kategorie aktualisieren{% endblock %}
+{% block headline %}Geräteklasse aktualisieren{% endblock %}
 
 {% block content %}
 
@@ -8,9 +8,9 @@
 	{{ form_errors(form) }}
 	{{ form_widget(form) }}
 	<div class="form-actions">
-    	<input class="btn btn-primary" type="submit" value="Kategorie aktualisieren" />
+    	<input class="btn btn-primary" type="submit" value="Geräteklasse aktualisieren" />
 		<a href="{{ path('category_index') }}" class="btn">Abbrechen</a>
-    	<a href="{{ path('category_delete', {'id': id }) }}" class="btn btn-danger"><i class="icon-trash icon-white"></i> {% trans %}Kategorie löschen{% endtrans %}</a>
+    	<a href="{{ path('category_delete', {'id': id }) }}" class="btn btn-danger"><i class="icon-trash icon-white"></i> {% trans %}Geräteklasse löschen{% endtrans %}</a>
 	</div>
 </form>
 

@@ -1,11 +1,11 @@
 {% extends 'RentBundle::base.html.twig' %}
 {% from 'MopaBootstrapBundle::flash.html.twig' import flash %}
-{% block headline %}Kategorien{% endblock %}
+{% block headline %}Geräteklassen{% endblock %}
 
 {% block content %}
 
 {% if categories|length == 0 %}
-	{{ flash('info', 'Es sind keine Kategorien vorhanden.', false, true) }}
+	{{ flash('info', 'Es sind keine Geräteklassen vorhanden.', false, true) }}
 {% else %}
 	<table class="table table-striped">
 		<tbody>
