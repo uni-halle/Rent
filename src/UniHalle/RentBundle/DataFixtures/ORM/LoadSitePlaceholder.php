@@ -60,7 +60,7 @@ class LoadSitePlaceholder extends AbstractFixture implements OrderedFixtureInter
         $this->addReference('placeholder-deviceName', $pDeviceName);
 
         $pSerialNumber = new SitePlaceholder();
-        $pSerialNumber->setName('Ende (Datum)');
+        $pSerialNumber->setName('Seriennummer');
         $pSerialNumber->setPlaceholder('{DEVICE.SERIAL_NUMBER}');
         $manager->persist($pSerialNumber);
         $this->addReference('placeholder-serialNumber', $pSerialNumber);
