@@ -31,10 +31,16 @@
 																 'start_display': start_display,
 																 'start_date': day.date|date('Y-m-d') }) }}">{{ day.date|date('d') }}</a>
 							{% elseif dateToChoose == 'end' %}
+								{% if bookingType == 'new' %}
 								<a href="{{ path('booking_new', {'device_id': device.id,
 																 'start_display': start_display,
 																 'start_date': startDateObj|date('Y-m-d'),
 																 'end_date': day.date|date('Y-m-d') }) }}">{{ day.date|date('d') }}</a>
+								{% elseif bookingType == 'extend' %}
+								<a href="{{ path('booking_extend', {'booking_id': booking.id,
+																    'start_display': start_display,
+																    'end_date': day.date|date('Y-m-d') }) }}">{{ day.date|date('d') }}</a>
+								{% endif %}
 							{% endif %}
 						{% else %}
 							{{ day.date|date('d') }}

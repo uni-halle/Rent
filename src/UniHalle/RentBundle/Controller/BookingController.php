@@ -4,14 +4,18 @@ namespace UniHalle\RentBundle\Controller;
 
 use UniHalle\RentBundle\Entity\Device;
 use UniHalle\RentBundle\Entity\Booking;
+use UniHalle\RentBundle\Entity\BookingExtension;
 use UniHalle\RentBundle\Entity\Configuration;
 use UniHalle\RentBundle\Form\Type\BookingType;
+use UniHalle\RentBundle\Form\Type\BookingExtensionType;
 use UniHalle\RentBundle\Types\BookingStatusType;
+use UniHalle\RentBundle\Types\BookingExtensionStatusType;
 use JMS\SecurityExtraBundle\Annotation\Secure;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 
 /**
  * @Route("/booking")
@@ -381,10 +385,136 @@ class BookingController extends Controller
         );
     }
 
-    private function getMonthsArray($startDate, $endDate, $device_id)
+    /**
+     * @Route("/extend/{booking_id}/{start_display}/{end_date}", name="booking_extend")
+     * @Secure(roles="ROLE_USER")
+     * @todo: enable user check
+     */
+    public function extendAction(Request $request, $booking_id, $start_display = null, $end_date = null)
     {
         $em = $this->getDoctrine()->getManager();
-        $currentBookings = $em->getRepository('RentBundle:Booking')->getCurrentBookings($device_id);
+
+        $booking = $em->getRepository('RentBundle:Booking')
+                      ->findOneById($booking_id);
+        if (!$booking) {
+            throw $this->createNotFoundException('Buchung wurde nicht gefunden.');
+        }
+
+        $user = $em->getRepository('RentBundle:User')
+                   ->findOneById(1);
+
+        if ($booking->getUser()->getId() != $user->getId()) {
+            throw new AccessDeniedHttpException('Sie dürfen diese Buchung nicht bearbeiten.');
+        }
+
+        if (!in_array($booking->getStatus(), array(BookingStatusType::APPROVED, BookingStatusType::IN_RENT))) {
+            throw new AccessDeniedHttpException('Diese Buchung kann nicht verlängert werden.');
+        }
+
+        if ($start_display !== null) {
+            $startDisplay = new \DateTime($start_display . '-01 00:00:00');
+        } else {
+            $startDisplay = new \DateTime('first day of this month 00:00:00');
+        }
+        $endDisplay = clone $startDisplay;
+        $intervalDay = new \DateInterval('P1D');
+        $intervalDay->invert = 1;
+        $endDisplay->add(new \DateInterval('P8M'))->add($intervalDay);
+
+        $nextDisplay = clone $endDisplay;
+        $nextDisplay->add(new \DateInterval('P1D'));
+
+        if ($startDisplay > new \DateTime('first day of this month 00:00:00')) {
+            $prevDisplay = clone $startDisplay;
+            $intervalNineMonths = new \DateInterval('P8M');
+            $intervalNineMonths->invert = -1;
+            $prevDisplay->add($intervalNineMonths);
+        } else {
+            $prevDisplay = null;
+        }
+
+        $dates = $this->getMonthsArray($startDisplay, $endDisplay, $booking->getDevice()->getId(), $booking);
+
+        $error = null;
+        $endDateObj = ($end_date !== null) ? new \DateTime($end_date . ' 00:00:00') : null;
+
+        if ($endDateObj !== null) {
+            if ($endDateObj < new \DateTime('today 00:00:00')) {
+                $this->get('session')->getFlashBag()->add(
+                    'error',
+                    $this->get('translator')->trans('Die Rückgabe kann nicht in der Vergangenheit erfolgen.')
+                );
+            } else if ($endDateObj < $booking->getDateFrom()) {
+                $this->get('session')->getFlashBag()->add(
+                    'error',
+                    $this->get('translator')->trans('Die Rückgabe kann nicht vor Beginn der Entleihung erfolgen.')
+                );
+            } elseif ($em->getRepository('RentBundle:Booking')->bookingExistsInPeriod($booking->getDevice()->getId(), $booking->getDateFrom(), $endDateObj, $booking)) {
+                    $this->get('session')->getFlashBag()->add(
+                        'error',
+                        $this->get('translator')->trans('In diesem Zeitraum liegt bereits eine Buchung.')
+                    );
+            } else {
+                $bookingExtension = new BookingExtension();
+                $bookingExtension->setBooking($booking);
+                $bookingExtension->setDateTo($endDateObj);
+
+                $form = $this->createForm(new BookingExtensionType($this->get('translator'), $this->get('security.context')), $bookingExtension);
+
+                return $this->render('RentBundle:Booking:extend_form.html.twig', array(
+                    'bookingExtension' => $bookingExtension,
+                    'form'             => $form->createView()
+                ));
+            }
+        }
+
+        if ($request->isMethod('POST')) {
+            $bookingExtension = new BookingExtension();
+            $bookingExtension->setBooking($booking);
+            $form = $this->createForm(new BookingExtensionType($this->get('translator'), $this->get('security.context')), $bookingExtension);
+            $form->bind($request);
+
+            if (($booking->getDateFrom() <= $bookingExtension->getDateTo()) &&
+                    !$em->getRepository('RentBundle:Booking')->bookingExistsInPeriod($booking->getDevice()->getId(), $booking->getDateFrom(), $bookingExtension->getDateTo(), $booking) &&
+                    $form->isValid()) {
+                $bookingExtension->setStatus(BookingExtensionStatusType::PRELIMINARY);
+                $em->persist($bookingExtension);
+                $em->flush();
+
+                $this->get('mailer')->send($this->getBookingExtensionMessage($bookingExtension->getId()));
+
+                $this->get('session')->getFlashBag()->add(
+                    'success',
+                    $this->get('translator')->trans('Ihre Buchungsverlängerung wurde vorläufig angenommen. Sobald die Verlängerung genehmigt wurde, erhalten Sie eine Benachrichtigung per E-Mail.')
+                );
+
+                return $this->redirect($this->generateUrl('booking_index'));
+            } else {
+                $this->get('session')->getFlashBag()->add(
+                    'error',
+                    $this->get('translator')->trans('Ein Fehler ist bei der Bearbeitung ihrer Verlängerung aufgetreten.')
+                );
+            }
+        }
+
+
+        return $this->render(
+            'RentBundle:Booking:extend.html.twig',
+            array(
+                'booking'         => $booking,
+                'dates'           => $dates,
+                'start_display'   => $startDisplay->format('Y-m'),
+                'nextDisplayDate' => $nextDisplay,
+                'prevDisplayDate' => $prevDisplay,
+                'dateToChoose'    => 'end'
+            )
+        );
+    }
+
+    private function getMonthsArray($startDate, $endDate, $device_id, $bookingToExclude = null)
+    {
+        $em = $this->getDoctrine()->getManager();
+        $currentBookings = $em->getRepository('RentBundle:Booking')->getCurrentBookings($device_id, $bookingToExclude);
         $holidays = $em->getRepository('RentBundle:Configuration')->getHolidays();
 
         $currentDate = clone $startDate;
@@ -462,6 +592,55 @@ class BookingController extends Controller
         $content = str_replace('{DATE.NOW}', date('d.m.Y'), $content);
         $content = str_replace('{DATE.START}', $booking->getDateFrom()->format('d.m.Y'), $content);
         $content = str_replace('{DATE.END}', $booking->getDateTo()->format('d.m.Y'), $content);
+        $content = str_replace('{DEVICE.NAME}', $booking->getDevice()->getName(), $content);
+        $content = str_replace('{DEVICE.SERIAL_NUMBER}', $booking->getDevice()->getSerialNumber(), $content);
+
+        $message = \Swift_Message::newInstance()->setSubject($mail->getSubject())
+                                                ->setFrom($config->getValue('mailSender'))
+                                                ->setTo($to)
+                                                ->setBody($content);
+        return $message;
+    }
+
+    private function getBookingExtensionMessage($bookingExtensionId)
+    {
+        $em = $this->getDoctrine()->getManager();
+
+        $config = $em->getRepository('RentBundle:Configuration');
+
+        $bookingExtension = $em->getRepository('RentBundle:BookingExtension')->findOneById($bookingExtensionId);
+        if (!$bookingExtension) {
+            throw $this->createNotFoundException('Buchungsverlängerung wurde nicht gefunden.');
+        }
+        $booking = $bookingExtension->getBooking();
+
+        $mail = null;
+        $to = '';
+        if ($bookingExtension->getStatus() == BookingExtensionStatusType::APPROVED) {
+            $mail = $em->getRepository('RentBundle:Site')->findOneByIdentifier('mailRentalExtendAccpeted');
+            $to = $booking->getUser()->getMail();
+        } else if ($bookingExtension->getStatus() == BookingExtensionStatusType::CANCELED) {
+            $mail = $em->getRepository('RentBundle:Site')->findOneByIdentifier('mailRentalExtendDenied');
+            $to = $booking->getUser()->getMail();
+        } else if ($bookingExtension->getStatus() == BookingExtensionStatusType::PRELIMINARY) {
+            $mail = $em->getRepository('RentBundle:Site')->findOneByIdentifier('mailExtendRent');
+            $to = $config->getValue('adminMail');
+        }
+
+        if (!$mail) {
+            throw $this->createNotFoundException('E-Mail Inhalt wurde nicht gefunden.');
+        }
+
+        $subject = $mail->getSubject();
+
+        $content = $mail->getContent();
+        $content = str_replace('{USER.SURNAME}', $booking->getUser()->getSurname(), $content);
+        $content = str_replace('{USER.NAME}', $booking->getUser()->getName(), $content);
+        $content = str_replace('{USER.MAIL}', $booking->getUser()->getMail(), $content);
+        $content = str_replace('{DATE.NOW}', date('d.m.Y'), $content);
+        $content = str_replace('{DATE.START}', $booking->getDateFrom()->format('d.m.Y'), $content);
+        $content = str_replace('{DATE.END}', $booking->getDateTo()->format('d.m.Y'), $content);
+        $content = str_replace('{DATE.EXTEND_END}', $bookingExtension->getDateTo()->format('d.m.Y'), $content);
         $content = str_replace('{DEVICE.NAME}', $booking->getDevice()->getName(), $content);
         $content = str_replace('{DEVICE.SERIAL_NUMBER}', $booking->getDevice()->getSerialNumber(), $content);
 

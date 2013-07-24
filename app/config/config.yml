@@ -58,6 +58,7 @@ doctrine:
             enum: string
         types:
             BookingStatusType: UniHalle\RentBundle\Types\BookingStatusType
+            BookingExtensionStatusType: UniHalle\RentBundle\Types\BookingExtensionStatusType
             SiteType: UniHalle\RentBundle\Types\SiteType
         # if using pdo_sqlite as your database driver, add the path in parameters.yml
         # e.g. database_path: %kernel.root_dir%/data/data.db3

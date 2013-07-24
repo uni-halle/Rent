@@ -1,0 +1,36 @@
+{% extends 'RentBundle::base.html.twig' %}
+{% from 'MopaBootstrapBundle::flash.html.twig' import flash %}
+
+{% block headline %}Buchung verlängern{% endblock %}
+
+{% block content %}
+	{{ flash('info', 'Bitte wählen Sie den gewünschten Rückgabetermin ihrer bestehenden Buchung des Geräts <b>' ~ booking.device.name ~ '</b> mit Beginn am <b>' ~ booking.dateFrom|date('d.m.Y') ~ '</b>.', false, true) }}
+
+	{% include 'RentBundle:Booking:calendar.html.twig' with {
+		'dates': dates,
+		'device': booking.device,
+		'booking': booking,
+		'start_display': start_display,
+		'dateToChoose': dateToChoose,
+		'startDateObj': booking.dateFrom,
+		'bookingType': 'extend'
+	} %}
+
+	<div class="clearfix">
+	{% if prevDisplayDate %}
+		<a href="{{ path('booking_extend', { 'booking_id': booking.id, 'start_display': prevDisplayDate|date('Y-m') }) }}" class="btn pull-left"><i class="icon-arrow-left"></i> Frühere Buchung</a>
+	{% endif %}
+	<a href="{{ path('booking_extend', { 'booking_id': booking.id, 'start_display': nextDisplayDate|date('Y-m') }) }}" class="btn pull-right">Spätere Buchung <i class="icon-arrow-right"></i></a>
+	</div>
+
+	<script type="text/javascript">
+		var dateToChoose = '{{ dateToChoose }}';
+		{% if dateToChoose == 'end' %}
+		var startDate = {{ booking.dateFrom|date('U') }};
+		{% else %}
+		var startDate = 0;
+		{% endif %}
+	</script>
+
+
+{% endblock content %}

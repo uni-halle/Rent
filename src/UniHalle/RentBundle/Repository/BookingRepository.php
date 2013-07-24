@@ -9,7 +9,7 @@ use UniHalle\RentBundle\Types\BookingStatusType;
 
 class BookingRepository extends EntityRepository
 {
-    public function getCurrentBookings($deviceId)
+    public function getCurrentBookings($deviceId, $bookingToExlude = null)
     {
         $blockingPeriod = (int)$this->getEntityManager()->getRepository('RentBundle:Configuration')->getValue('blockingPeriod');
 
@@ -25,11 +25,13 @@ class BookingRepository extends EntityRepository
                            WHERE d.id = :device_id
                            AND (b.dateFrom >= :start_date OR b.dateTo >= :start_date)
                            AND b.status!=:status
+                           AND b.id!=:bookingToExclude
                            ORDER BY b.dateFrom'
                       )
                       ->setParameter('device_id', $deviceId)
                       ->setParameter('start_date', $startDate->format('Y-m-d'))
-                      ->setParameter('status', BookingStatusType::CANCELED);
+                      ->setParameter('status', BookingStatusType::CANCELED)
+                      ->setParameter('bookingToExclude', (!is_null($bookingToExlude)) ? $bookingToExlude->getId() : 0);
         return $query->getResult();
     }
 

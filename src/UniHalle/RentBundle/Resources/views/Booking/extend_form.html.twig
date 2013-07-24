@@ -1,0 +1,35 @@
+{% extends 'RentBundle::base.html.twig' %}
+
+{% block headline %}Buchung von "{{ bookingExtension.booking.device.name }}" verlängern{% endblock %}
+
+{% block content %}
+	<div>
+		<p class="lead">
+			Sie möchten ihre bestehende Buchung des Geräts <b>{{ bookingExtension.booking.device.name }}</b> verlängern.<br />
+		</p>
+
+		<p>
+			Bitte beachten Sie, dass die Verlängerung <span class="text-warning">vorläufig</span> ist.<br />
+			Sobald die Verlängerung genehmigt wurde, erhalten sie eine Benachrichtigung per E-Mail.
+		</p>
+
+		<p>
+			Beginn der Entleihung: <span class="text-info">{{ bookingExtension.booking.dateFrom|date('d.m.Y') }}</span><br />
+			Ende der Entleihung: <span class="text-info">{{ bookingExtension.dateTo|date('d.m.Y') }}</span><br />
+		</p>
+	</div>
+
+	<form action="{{ path('booking_extend', {'booking_id': bookingExtension.booking.id}) }}" method="post" {{ form_enctype(form) }} class="form-horizontal">
+		<div class="hidden">
+			{{ form_row(form.dateTo) }}
+		</div>
+
+		{{ form_errors(form) }}
+		{{ form_rest(form) }}
+		<div class="form-actions">
+	    	<input class="btn btn-primary" type="submit" value="Verlängerung beantragen" />
+			<a href="{{ path('booking_index') }}" class="btn">Abbrechen</a>
+		</div>
+	</form>
+
+{% endblock %}

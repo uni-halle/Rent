@@ -108,6 +108,7 @@ class LoadSites extends AbstractFixture implements OrderedFixtureInterface
         $mailAdminExtendRent->setIdentifier('mailExtendRent');
         $mailAdminExtendRent->setType(SiteType::ADMIN_MAIL);
         $this->addRentMailPlaceholders($mailAdminExtendRent);
+        $mailAdminExtendRent->getPlaceholders()->add($this->getReference('placeholder-dateNewEnd'));
         $sites[] = $mailAdminExtendRent;
 
         foreach ($sites as $site) {

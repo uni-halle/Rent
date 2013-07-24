@@ -35,7 +35,7 @@
   			{{ flash('info', 'Es liegen keine vergangenen Buchungen vor.', false, false) }}
   		{% endif %}
   	{% else %}
-		<table class="table">
+		<table class="table table-striped">
 			<thead>
 				<tr>
 					{% if is_granted('ROLE_ADMIN') %}
@@ -60,6 +60,9 @@
 						<th>Bearbeiten</th>
 					{% endif %}
 					<th>Status</th>
+					{% if not is_granted('ROLE_ADMIN') and time == 'now' %}
+					<th>Bearbeiten</th>
+					{% endif %}
 					{% if is_granted('ROLE_ADMIN') %}
 						<th>Dokumente</th>
 					{% endif %}
@@ -113,10 +116,21 @@
 							</td>
 						{% elseif is_granted('ROLE_USER') %}
 							<td>
-								<span class="label {% if booking.status == 'preliminary' %}label-info{% elseif booking.status == 'canceled' %}label-important{% elseif booking.status == 'gotBack' %}label-success{% elseif booking.status == 'inRent' %}label-warning{% endif %}">
+								<span class="badge {% if booking.status == 'preliminary' %}badge-info{% elseif booking.status == 'canceled' %}badge-important{% elseif booking.status == 'gotBack' %}badge-success{% elseif booking.status == 'inRent' %}badge-warning{% endif %}">
 								{{ booking.status|readable_enum_value('BookingStatusType') }}
 								</span>
 							</td>
+							{% if time == 'now' %}
+								<td>
+									{% if booking.status == 'approved' or booking.status == 'inRent' %}
+										{% if booking.hasPendingExtensions %}
+											<span class="label label-inverse">Verlängerungsantrag in Bearbeitung</span>
+										{% else %}
+											<a href="{{ path('booking_extend', {'booking_id': booking.id}) }}" class="btn btn-mini">Verlängerung beantragen</a>
+										{% endif %}
+									{% endif %}
+								</td>
+							{% endif %}
 						{% endif %}
 					</tr>
 				{% endfor %}

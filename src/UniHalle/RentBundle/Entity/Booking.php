@@ -3,10 +3,13 @@
 namespace UniHalle\RentBundle\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
+use Doctrine\Common\Collections\ArrayCollection;
 use Symfony\Component\Validator\Constraints as Assert;
 use Fresh\Bundle\DoctrineEnumBundle\Validator\Constraints as DoctrineAssert;
 use UniHalle\RentBundle\Types\BookingStatusType;
 use UniHalle\RentBundle\Helper\BookingHelper;
+use UniHalle\RentBundle\Entity\BookingExtension;
+use UniHalle\RentBundle\Types\BookingExtensionStatusType;
 
 /**
  * @ORM\Entity(repositoryClass="UniHalle\RentBundle\Repository\BookingRepository")
@@ -26,6 +29,11 @@ class Booking
      * @Assert\NotNull
      */
     private $device;
+
+    /**
+     * @ORM\OneToMany(targetEntity="BookingExtension", mappedBy="booking", cascade={"all"})
+     */
+    private $extensions;
 
     /**
      * @ORM\ManyToOne(targetEntity="User", inversedBy="bookings")
@@ -63,6 +71,11 @@ class Booking
      * @ORM\Column(type="datetime")
      */
     protected $created;
+
+    public function __construct()
+    {
+        $this->extensions = new ArrayCollection();
+    }
 
     /**
      * Get id
@@ -193,6 +206,16 @@ class Booking
     }
 
     /**
+     * Get extensions
+     *
+     * @return ArrayCollection
+     */
+    public function getExtensions()
+    {
+        return $this->extensions;
+    }
+
+    /**
      * Set user
      *
      * @param \UniHalle\RentBundle\Entity\User $user
@@ -213,6 +236,16 @@ class Booking
     public function getUser()
     {
         return $this->user;
+    }
+
+    public function hasPendingExtensions()
+    {
+        foreach ($this->getExtensions() as $extension) {
+            if ($extension->getStatus() == BookingExtensionStatusType::PRELIMINARY) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /**

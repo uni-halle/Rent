@@ -47,6 +47,12 @@ class LoadSitePlaceholder extends AbstractFixture implements OrderedFixtureInter
         $manager->persist($pDateEnd);
         $this->addReference('placeholder-dateEnd', $pDateEnd);
 
+        $pDateNewEnd = new SitePlaceholder();
+        $pDateNewEnd->setName('Ende der Verlängerung (Datum)');
+        $pDateNewEnd->setPlaceholder('{DATE.NEW_END}');
+        $manager->persist($pDateNewEnd);
+        $this->addReference('placeholder-dateNewEnd', $pDateNewEnd);
+
         $pDeviceName = new SitePlaceholder();
         $pDeviceName->setName('Gerät');
         $pDeviceName->setPlaceholder('{DEVICE.NAME}');
