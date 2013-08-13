@@ -36,3 +36,14 @@ services:
         class: UniHalle\RentBundle\Twig\CeilExtension
         tags:
             - { name: twig.extension }
+
+    ldap.listener:
+        class: UniHalle\RentBundle\EventListener\LdapSecurityListener
+        tags:
+            - { name: kernel.event_subscriber }
+
+    ldap.login_successful_listener:
+        class: UniHalle\RentBundle\EventListener\LoginListener
+        arguments: [@doctrine]
+        tags:
+            - { name: kernel.event_listener, event: security.interactive_login, method: onLogin }

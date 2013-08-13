@@ -14,4 +14,9 @@ parameters:
     locale:            de_DE
     secret:            3d5520672f7869636d53286853
 
-    blocking_period:   2
+    ldap_host: localhost
+    ldap_port: 389
+    ldap_version: 3
+    ldap_user_basedn: ou=rent,c=de
+    ldap_admin_user: uid=rent_admin,c=de
+    ldap_admin_pass: xxx

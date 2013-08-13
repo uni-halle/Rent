@@ -5,6 +5,7 @@ jms_security_extra:
 security:
     encoders:
         Symfony\Component\Security\Core\User\User: plaintext
+        IMAG\LdapBundle\User\LdapUser: plaintext
 
     role_hierarchy:
         ROLE_ADMIN:       ROLE_USER
@@ -15,6 +16,11 @@ security:
                 users:
                     user:  { password: testme, roles: [ 'ROLE_USER' ] }
                     admin: { password: testme, roles: [ 'ROLE_ADMIN' ] }
+        ldap:
+            id: imag_ldap.security.user.provider
+        multiple:
+            chain:
+                providers: [ldap, in_memory]
 
     firewalls:
         dev:
@@ -24,7 +30,7 @@ security:
         secured_area:
             pattern:    ^/
             anonymous: true
-            provider: in_memory
+            provider: multiple
             form_login:
                 login_path: index
                 check_path: login_check
@@ -35,6 +41,8 @@ security:
                 path:   /logout
                 target: /
                 invalidate_session: false
+            imag_ldap:
+                login_path:   index
             remember_me:
                 key:      "%secret%"
                 lifetime: 31536000
@@ -43,3 +51,19 @@ security:
 
     access_control:
         #- { path: ^/login, roles: IS_AUTHENTICATED_ANONYMOUSLY, requires_channel: https }
+
+imag_ldap:
+    client:
+        host: %ldap_host%
+        port: %ldap_port%
+        version: %ldap_version%
+        username: %ldap_admin_user%
+        password: %ldap_admin_pass%
+        referrals_enabled: false
+        bind_username_before: false
+        skip_roles: true
+
+    user:
+        base_dn: %ldap_user_basedn%
+        name_attribute: uid
+        attributes: [mluPersonType]
