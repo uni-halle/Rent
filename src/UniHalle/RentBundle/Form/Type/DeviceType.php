@@ -34,12 +34,29 @@ class DeviceType extends AbstractType
         );
         $builder->add(
             'description',
-            null,
+            'ckeditor',
             array(
                 'label' => $this->translator->trans('Beschreibung'),
                 'attr'  => array(
                     'rows' => 10,
                     'class' => 'input-xxlarge'
+                ),
+                'config' => array(
+                    'toolbar' => array(
+                        array(
+                            'name'  => 'basicstyles',
+                            'items' => array('Bold', 'Italic', 'Underline', 'Strike', 'Subscript', 'Superscript', '-', 'RemoveFormat'),
+                        ),
+                        array(
+                            'name' => 'paragraph',
+                            'items' => array('NumberedList','BulletedList','-','Outdent','Indent','-','Blockquote','CreateDiv','-','JustifyLeft','JustifyCenter','JustifyRight','JustifyBlock','-','BidiLtr','BidiRtl')
+                        ),
+                        '/',
+                        array(
+                            'name'  => 'styles',
+                            'items' => array('Styles','Format','Font','FontSize'),
+                        ),
+                    )
                 )
             )
         );

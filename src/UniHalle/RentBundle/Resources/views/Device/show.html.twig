@@ -18,7 +18,7 @@
   		<dd>{{ device.serialNumber }}</dd>
   	{% endif %}
   	<dt>Beschreibung<dt>
-    <dd>{{ device.description }}</dd>
+    <dd>{{ device.description|raw }}</dd>
 </dl>
 
 <div class="form-actions">
