@@ -4,12 +4,10 @@ namespace UniHalle\RentBundle\Controller;
 
 use UniHalle\RentBundle\Entity\Device;
 use UniHalle\RentBundle\Entity\Booking;
-use UniHalle\RentBundle\Entity\BookingExtension;
 use UniHalle\RentBundle\Entity\Configuration;
 use UniHalle\RentBundle\Form\Type\BookingType;
 use UniHalle\RentBundle\Form\Type\BookingExtensionType;
 use UniHalle\RentBundle\Types\BookingStatusType;
-use UniHalle\RentBundle\Types\BookingExtensionStatusType;
 use JMS\SecurityExtraBundle\Annotation\Secure;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
@@ -194,6 +192,7 @@ class BookingController extends Controller
                     !$em->getRepository('RentBundle:Booking')->bookingExistsInPeriod($device_id, $booking->getDateFrom(), $booking->getDateTo()) &&
                     $form->isValid()) {
                 $booking->setStatus(BookingStatusType::PRELIMINARY);
+                $booking->setExtensionStatus(BookingStatusType::UNKNOWN);
                 $em->persist($booking);
                 $em->flush();
 
@@ -455,33 +454,27 @@ class BookingController extends Controller
                         $this->get('translator')->trans('In diesem Zeitraum liegt bereits eine Buchung.')
                     );
             } else {
-                $bookingExtension = new BookingExtension();
-                $bookingExtension->setBooking($booking);
-                $bookingExtension->setDateTo($endDateObj);
-
-                $form = $this->createForm(new BookingExtensionType($this->get('translator'), $this->get('security.context')), $bookingExtension);
+                $booking->setExtensionDateTo($endDateObj);
+                $form = $this->createForm(new BookingExtensionType($this->get('translator'), $this->get('security.context')), $booking);
 
                 return $this->render('RentBundle:Booking:extend_form.html.twig', array(
-                    'bookingExtension' => $bookingExtension,
-                    'form'             => $form->createView()
+                    'booking' => $booking,
+                    'form'    => $form->createView()
                 ));
             }
         }
 
         if ($request->isMethod('POST')) {
-            $bookingExtension = new BookingExtension();
-            $bookingExtension->setBooking($booking);
-            $form = $this->createForm(new BookingExtensionType($this->get('translator'), $this->get('security.context')), $bookingExtension);
+            $form = $this->createForm(new BookingExtensionType($this->get('translator'), $this->get('security.context')), $booking);
             $form->bind($request);
 
-            if (($booking->getDateFrom() <= $bookingExtension->getDateTo()) &&
-                    !$em->getRepository('RentBundle:Booking')->bookingExistsInPeriod($booking->getDevice()->getId(), $booking->getDateFrom(), $bookingExtension->getDateTo(), $booking) &&
-                    $form->isValid()) {
-                $bookingExtension->setStatus(BookingExtensionStatusType::PRELIMINARY);
-                $em->persist($bookingExtension);
+            if (($booking->getDateFrom() <= $booking->getExtensionDateTo()) &&
+                    !$em->getRepository('RentBundle:Booking')->bookingExistsInPeriod($booking->getDevice()->getId(), $booking->getDateFrom(), $booking->getExtensionDateTo(), $booking)) {
+                $booking->setExtensionStatus(BookingStatusType::PRELIMINARY);
+                $em->persist($booking);
                 $em->flush();
 
-                $this->get('mailer')->send($this->getBookingExtensionMessage($bookingExtension->getId()));
+                $this->get('mailer')->send($this->getBookingExtensionMessage($booking->getId(), 'created'));
 
                 $this->get('session')->getFlashBag()->add(
                     'success',
@@ -511,6 +504,39 @@ class BookingController extends Controller
         );
     }
 
+    /**
+     * @Route("/extendStatus/{id}/{status}", name="booking_extendStatus")
+     * @Secure(roles="ROLE_ADMIN")
+     */
+    public function extendStatusAction($id, $status)
+    {
+        $em = $this->getDoctrine()->getManager();
+        $booking = $em->getRepository('RentBundle:Booking')
+                      ->findOneById($id);
+        if (!$booking) {
+            throw $this->createNotFoundException('Buchung wurde nicht gefunden.');
+        }
+
+        if ($status == 'approved') {
+            $this->get('mailer')->send($this->getBookingExtensionMessage($booking->getId(), 'approved'));
+            $this->get('session')->getFlashBag()->add(
+                'success',
+                $this->get('translator')->trans('Buchungsverlängerung wurde genehmigt')
+            );
+            $booking->setDateTo($booking->getExtensionDateTo());
+        } else if ($status == 'canceled') {
+            $this->get('mailer')->send($this->getBookingExtensionMessage($booking->getId(), 'canceled'));
+            $this->get('session')->getFlashBag()->add(
+                'success',
+                $this->get('translator')->trans('Buchungsverlängerung wurde abgelehnt')
+            );
+        }
+        $booking->setExtensionDateTo(null);
+        $em->flush();
+
+        return $this->redirect($this->generateUrl('booking_index'));
+    }
+
     private function getMonthsArray($startDate, $endDate, $device_id, $bookingToExclude = null)
     {
         $em = $this->getDoctrine()->getManager();
@@ -527,7 +553,7 @@ class BookingController extends Controller
         do {
             $booked = 0;
             foreach ($currentBookings as $b) {
-                if ($b->getDateFrom() <= $currentDate && $b->getDateBlockedUntil() >= $currentDate) {
+                if ($b->getDateFrom() <= $currentDate && ($b->getDateBlockedUntil() >= $currentDate || $b->getExtensionDateBlockedUntil() >= $currentDate)) {
                     $booked = 1;
                 }
             }
@@ -602,27 +628,25 @@ class BookingController extends Controller
         return $message;
     }
 
-    private function getBookingExtensionMessage($bookingExtensionId)
+    private function getBookingExtensionMessage($bookingId, $type)
     {
         $em = $this->getDoctrine()->getManager();
 
         $config = $em->getRepository('RentBundle:Configuration');
 
-        $bookingExtension = $em->getRepository('RentBundle:BookingExtension')->findOneById($bookingExtensionId);
-        if (!$bookingExtension) {
+        $booking = $em->getRepository('RentBundle:Booking')->findOneById($bookingId);
+        if (!$booking) {
             throw $this->createNotFoundException('Buchungsverlängerung wurde nicht gefunden.');
         }
-        $booking = $bookingExtension->getBooking();
-
         $mail = null;
         $to = '';
-        if ($bookingExtension->getStatus() == BookingExtensionStatusType::APPROVED) {
-            $mail = $em->getRepository('RentBundle:Site')->findOneByIdentifier('mailRentalExtendAccpeted');
+        if ($type == 'approved') {
+            $mail = $em->getRepository('RentBundle:Site')->findOneByIdentifier('mailRentalExtendAccepted');
             $to = $booking->getUser()->getMail();
-        } else if ($bookingExtension->getStatus() == BookingExtensionStatusType::CANCELED) {
+        } else if ($type == 'canceled') {
             $mail = $em->getRepository('RentBundle:Site')->findOneByIdentifier('mailRentalExtendDenied');
             $to = $booking->getUser()->getMail();
-        } else if ($bookingExtension->getStatus() == BookingExtensionStatusType::PRELIMINARY) {
+        } else if ($type == 'created') {
             $mail = $em->getRepository('RentBundle:Site')->findOneByIdentifier('mailExtendRent');
             $to = $config->getValue('adminMail');
         }
@@ -640,7 +664,7 @@ class BookingController extends Controller
         $content = str_replace('{DATE.NOW}', date('d.m.Y'), $content);
         $content = str_replace('{DATE.START}', $booking->getDateFrom()->format('d.m.Y'), $content);
         $content = str_replace('{DATE.END}', $booking->getDateTo()->format('d.m.Y'), $content);
-        $content = str_replace('{DATE.EXTEND_END}', $bookingExtension->getDateTo()->format('d.m.Y'), $content);
+        $content = str_replace('{DATE.NEW_END}', $booking->getExtensionDateTo()->format('d.m.Y'), $content);
         $content = str_replace('{DEVICE.NAME}', $booking->getDevice()->getName(), $content);
         $content = str_replace('{DEVICE.SERIAL_NUMBER}', $booking->getDevice()->getSerialNumber(), $content);
 

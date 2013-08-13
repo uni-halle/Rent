@@ -23,7 +23,7 @@ class BookingRepository extends EntityRepository
                           'SELECT b FROM RentBundle:Booking b
                            LEFT JOIN b.device d
                            WHERE d.id = :device_id
-                           AND (b.dateFrom >= :start_date OR b.dateTo >= :start_date)
+                           AND (b.dateFrom >= :start_date OR b.dateTo >= :start_date OR (b.extensionDateTo IS NOT NULL AND b.extensionDateTo >= :start_date))
                            AND b.status!=:status
                            AND b.id!=:bookingToExclude
                            ORDER BY b.dateFrom'
@@ -32,6 +32,7 @@ class BookingRepository extends EntityRepository
                       ->setParameter('start_date', $startDate->format('Y-m-d'))
                       ->setParameter('status', BookingStatusType::CANCELED)
                       ->setParameter('bookingToExclude', (!is_null($bookingToExlude)) ? $bookingToExlude->getId() : 0);
+
         return $query->getResult();
     }
 
@@ -47,7 +48,8 @@ class BookingRepository extends EntityRepository
                            WHERE d.id = :device_id
                            AND (
                                (b.dateFrom >= :start_date AND b.dateFrom <= :end_date) OR
-                               (b.dateBlockedUntil >= :start_date AND b.dateBlockedUntil <= :end_date)
+                               (b.dateBlockedUntil >= :start_date AND b.dateBlockedUntil <= :end_date) OR
+                               (b.extensionDateBlockedUntil IS NOT NULL AND b.extensionDateBlockedUntil >= :start_date AND b.extensionDateBlockedUntil <= :end_date)
                            )
                            AND b.status!=:status
                            AND b.id!=:bookingToExclude'
@@ -73,8 +75,11 @@ class BookingRepository extends EntityRepository
                                LEFT JOIN b.device d
                                LEFT JOIN b.user u
                                WHERE
-                                   (b.dateFrom>=CURRENT_DATE() OR
-                                   (b.dateFrom<=CURRENT_DATE() AND b.dateTo>=CURRENT_DATE()))
+                                   (
+                                     b.dateFrom>=CURRENT_DATE() OR
+                                     (b.dateFrom<=CURRENT_DATE() AND b.dateTo>=CURRENT_DATE()) OR
+                                     (b.dateFrom<=CURRENT_DATE() AND b.extensionDateTo IS NOT NULL AND b.extensionDateTo>=CURRENT_DATE())
+                                   )
                                    '.$userQuery.'
                                    '.$deviceQuery.'
                                ORDER BY b.dateFrom'
@@ -86,7 +91,7 @@ class BookingRepository extends EntityRepository
                                LEFT JOIN b.device d
                                LEFT JOIN b.user u
                                WHERE
-                                   b.dateTo<CURRENT_DATE()
+                                   (b.dateTo<CURRENT_DATE() OR (b.extensionDateTo IS NOT NULL AND b.extensionDateTo<CURRENT_DATE()))
                                    '.$userQuery.'
                                    '.$deviceQuery.'
                                ORDER BY b.dateFrom'

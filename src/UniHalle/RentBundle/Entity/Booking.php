@@ -9,7 +9,6 @@ use Fresh\Bundle\DoctrineEnumBundle\Validator\Constraints as DoctrineAssert;
 use UniHalle\RentBundle\Types\BookingStatusType;
 use UniHalle\RentBundle\Helper\BookingHelper;
 use UniHalle\RentBundle\Entity\BookingExtension;
-use UniHalle\RentBundle\Types\BookingExtensionStatusType;
 
 /**
  * @ORM\Entity(repositoryClass="UniHalle\RentBundle\Repository\BookingRepository")
@@ -31,11 +30,6 @@ class Booking
     private $device;
 
     /**
-     * @ORM\OneToMany(targetEntity="BookingExtension", mappedBy="booking", cascade={"all"})
-     */
-    private $extensions;
-
-    /**
      * @ORM\ManyToOne(targetEntity="User", inversedBy="bookings")
      * @Assert\NotNull
      */
@@ -52,15 +46,31 @@ class Booking
     private $dateTo;
 
     /**
-     * @ORM\Column(type="date")
+     * @ORM\Column(type="date", nullable=true)
+     */
+    private $extensionDateTo;
+
+    /**
+     * @ORM\Column(type="date", nullable=true)
      */
     private $dateBlockedUntil;
+
+    /**
+     * @ORM\Column(type="date", nullable=true)
+     */
+    private $extensionDateBlockedUntil;
 
     /**
      * @DoctrineAssert\Enum(entity="UniHalle\RentBundle\Types\BookingStatusType")
      * @ORM\Column(type="string", type="BookingStatusType", nullable=false)
      */
     private $status;
+
+    /**
+     * @DoctrineAssert\Enum(entity="UniHalle\RentBundle\Types\BookingStatusType")
+     * @ORM\Column(type="string", type="BookingStatusType", nullable=true)
+     */
+    private $extensionStatus;
 
     /**
      * @ORM\Column(type="datetime", nullable=true)
@@ -160,6 +170,58 @@ class Booking
     }
 
     /**
+     * Set extensionDateTo
+     *
+     * @param \DateTime $extensionDateTo
+     * @return Booking
+     */
+    public function setExtensionDateTo($extensionDateTo)
+    {
+        $this->extensionDateTo = $extensionDateTo;
+        if ($extensionDateTo === null) {
+            $this->setExtensionDateBlockedUntil(null);
+        } else {
+            $bookingHelper = new BookingHelper();
+            $this->setExtensionDateBlockedUntil($bookingHelper->calcBookedUntil($extensionDateTo));
+        }
+
+        return $this;
+    }
+
+    /**
+     * Get extensionDateTo
+     *
+     * @return \DateTime
+     */
+    public function getExtensionDateTo()
+    {
+        return $this->extensionDateTo;
+    }
+
+    /**
+     * Set extensionDateBlockedUntil
+     *
+     * @param \DateTime $extensionDateBlockedUntil
+     * @return Booking
+     */
+    public function setExtensionDateBlockedUntil($extensionDateBlockedUntil)
+    {
+        $this->extensionDateBlockedUntil = $extensionDateBlockedUntil;
+
+        return $this;
+    }
+
+    /**
+     * Get extensionDateBlockedUntil
+     *
+     * @return \DateTime
+     */
+    public function getExtensionDateBlockedUntil()
+    {
+        return $this->extensionDateBlockedUntil;
+    }
+
+    /**
      * Set status
      *
      * @param string $status
@@ -180,6 +242,29 @@ class Booking
     public function getStatus()
     {
         return $this->status;
+    }
+
+    /**
+     * Set extensionStatus
+     *
+     * @param string $extensionStatus
+     * @return Booking
+     */
+    public function setExtensionStatus($status)
+    {
+        $this->extensionStatus = $status;
+
+        return $this;
+    }
+
+    /**
+     * Get extensionStatus
+     *
+     * @return status
+     */
+    public function getExtensionStatus()
+    {
+        return $this->extensionStatus;
     }
 
     /**
@@ -206,16 +291,6 @@ class Booking
     }
 
     /**
-     * Get extensions
-     *
-     * @return ArrayCollection
-     */
-    public function getExtensions()
-    {
-        return $this->extensions;
-    }
-
-    /**
      * Set user
      *
      * @param \UniHalle\RentBundle\Entity\User $user
@@ -236,16 +311,6 @@ class Booking
     public function getUser()
     {
         return $this->user;
-    }
-
-    public function hasPendingExtensions()
-    {
-        foreach ($this->getExtensions() as $extension) {
-            if ($extension->getStatus() == BookingExtensionStatusType::PRELIMINARY) {
-                return true;
-            }
-        }
-        return false;
     }
 
     /**

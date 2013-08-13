@@ -106,6 +106,12 @@
 								  		</li>
 									</ul>
 								</div>
+								{% if booking.extensionDateTo != null %}
+									<br /><br />
+									<span class="label label-info">Verlängerung bis {{ booking.extensionDateTo|date('d.m.Y') }} beantragt</span><br />
+									<a href="{{ path('booking_extendStatus', {'id': booking.id, 'status': 'approved'}) }}" class="btn btn-mini btn-primary">Genehmigen</a>
+									<a href="{{ path('booking_extendStatus', {'id': booking.id, 'status': 'canceled'}) }}" class="btn btn-mini btn-danger">Ablehnen</a>
+								{% endif %}
 							</td>
 							<td>
 								{% if booking.status == 'inRent' %}
@@ -123,7 +129,7 @@
 							{% if time == 'now' %}
 								<td>
 									{% if booking.status == 'approved' or booking.status == 'inRent' %}
-										{% if booking.hasPendingExtensions %}
+										{% if booking.extensionDateTo != null %}
 											<span class="label label-inverse">Verlängerungsantrag in Bearbeitung</span>
 										{% else %}
 											<a href="{{ path('booking_extend', {'booking_id': booking.id}) }}" class="btn btn-mini">Verlängerung beantragen</a>

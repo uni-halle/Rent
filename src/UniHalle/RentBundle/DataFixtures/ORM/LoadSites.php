@@ -73,6 +73,7 @@ class LoadSites extends AbstractFixture implements OrderedFixtureInterface
         $mailRentalExtendAccepted->setIdentifier('mailRentalExtendAccepted');
         $mailRentalExtendAccepted->setType(SiteType::USER_MAIL);
         $this->addRentMailPlaceholders($mailRentalExtendAccepted);
+        $mailRentalExtendAccepted->getPlaceholders()->add($this->getReference('placeholder-dateNewEnd'));
         $sites[] = $mailRentalExtendAccepted;
 
         $mailRentalExtendDenied = new Site();
@@ -80,6 +81,7 @@ class LoadSites extends AbstractFixture implements OrderedFixtureInterface
         $mailRentalExtendDenied->setIdentifier('mailRentalExtendDenied');
         $mailRentalExtendDenied->setType(SiteType::USER_MAIL);
         $this->addRentMailPlaceholders($mailRentalExtendDenied);
+        $mailRentalExtendDenied->getPlaceholders()->add($this->getReference('placeholder-dateNewEnd'));
         $sites[] = $mailRentalExtendDenied;
 
         $mailRentalUpdated = new Site();

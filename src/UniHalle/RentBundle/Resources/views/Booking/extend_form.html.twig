@@ -1,11 +1,11 @@
 {% extends 'RentBundle::base.html.twig' %}
 
-{% block headline %}Buchung von "{{ bookingExtension.booking.device.name }}" verlängern{% endblock %}
+{% block headline %}Buchung von "{{ booking.device.name }}" verlängern{% endblock %}
 
 {% block content %}
 	<div>
 		<p class="lead">
-			Sie möchten ihre bestehende Buchung des Geräts <b>{{ bookingExtension.booking.device.name }}</b> verlängern.<br />
+			Sie möchten ihre bestehende Buchung des Geräts <b>{{ booking.device.name }}</b> verlängern.<br />
 		</p>
 
 		<p>
@@ -14,14 +14,14 @@
 		</p>
 
 		<p>
-			Beginn der Entleihung: <span class="text-info">{{ bookingExtension.booking.dateFrom|date('d.m.Y') }}</span><br />
-			Ende der Entleihung: <span class="text-info">{{ bookingExtension.dateTo|date('d.m.Y') }}</span><br />
+			Beginn der Entleihung: <span class="text-info">{{ booking.dateFrom|date('d.m.Y') }}</span><br />
+			Ende der Entleihung: <span class="text-info">{{ booking.extensionDateTo|date('d.m.Y') }}</span><br />
 		</p>
 	</div>
 
-	<form action="{{ path('booking_extend', {'booking_id': bookingExtension.booking.id}) }}" method="post" {{ form_enctype(form) }} class="form-horizontal">
+	<form action="{{ path('booking_extend', {'booking_id': booking.id}) }}" method="post" {{ form_enctype(form) }} class="form-horizontal">
 		<div class="hidden">
-			{{ form_row(form.dateTo) }}
+			{{ form_row(form.extensionDateTo) }}
 		</div>
 
 		{{ form_errors(form) }}

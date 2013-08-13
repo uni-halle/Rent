@@ -12,6 +12,7 @@ class BookingStatusType extends AbstractEnumType
     const APPROVED    = 'approved';
     const IN_RENT     = 'inRent';
     const GOT_BACK    = 'gotBack';
+    const UNKNOWN     = 'unknown';
 
     protected $name = 'BookingStatusType';
 
@@ -21,5 +22,6 @@ class BookingStatusType extends AbstractEnumType
         self::APPROVED    => 'Genehmigte Buchung',
         self::IN_RENT     => 'Gerät ausgeliehen',
         self::GOT_BACK    => 'Gerät zurückerhalten',
+        self::UNKNOWN     => 'unbekannt'
     ];
 }

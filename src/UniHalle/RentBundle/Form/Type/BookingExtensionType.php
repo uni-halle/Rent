@@ -21,7 +21,7 @@ class BookingExtensionType extends AbstractType
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
         $builder->add(
-            'dateTo',
+            'extensionDateTo',
             null,
             array('label' => $this->translator->trans('Bis'))
         );
