@@ -8,7 +8,6 @@ use Symfony\Component\Validator\Constraints as Assert;
 use Fresh\Bundle\DoctrineEnumBundle\Validator\Constraints as DoctrineAssert;
 use UniHalle\RentBundle\Types\BookingStatusType;
 use UniHalle\RentBundle\Helper\BookingHelper;
-use UniHalle\RentBundle\Entity\BookingExtension;
 
 /**
  * @ORM\Entity(repositoryClass="UniHalle\RentBundle\Repository\BookingRepository")

@@ -249,7 +249,7 @@ class BookingController extends Controller
                     $form->isValid()) {
                 $em->flush();
 
-                $this->get('mailer')->send($this->getBookingMessage($booking->getId()), true);
+                $this->get('mailer')->send($this->getBookingMessage($booking->getId(), true));
 
                 $this->get('session')->getFlashBag()->add(
                     'success',

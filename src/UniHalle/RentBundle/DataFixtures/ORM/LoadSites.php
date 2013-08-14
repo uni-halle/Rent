@@ -95,6 +95,8 @@ class LoadSites extends AbstractFixture implements OrderedFixtureInterface
         $mailAdminNewUser->setName('Nutzer: Registrierung');
         $mailAdminNewUser->setIdentifier('mailUserRegistered');
         $mailAdminNewUser->setType(SiteType::ADMIN_MAIL);
+        $mailAdminNewUser->setSubject('Geräteverleih: Nutzerregistrierung');
+        $mailAdminNewUser->setContent("Nutzerregistrierung\nVorname: {USER.NAME}\nNachname: {USER.SURNAME}\nNutzerkennzeichen: {USER.NKZ}\nAccount-Typ: {USER.ACCOUNT_TYPE}");
         $this->addRegisterMailPlaceholders($mailAdminNewUser);
         $sites[] = $mailAdminNewUser;
 
@@ -147,5 +149,7 @@ class LoadSites extends AbstractFixture implements OrderedFixtureInterface
         $mail->getPlaceholders()->add($this->getReference('placeholder-surname'));
         $mail->getPlaceholders()->add($this->getReference('placeholder-name'));
         $mail->getPlaceholders()->add($this->getReference('placeholder-mail'));
+        $mail->getPlaceholders()->add($this->getReference('placeholder-uid'));
+        $mail->getPlaceholders()->add($this->getReference('placeholder-accountType'));
     }
 }

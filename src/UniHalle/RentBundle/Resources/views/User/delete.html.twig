@@ -1,0 +1,16 @@
+{% extends 'RentBundle::base.html.twig' %}
+{% from 'MopaBootstrapBundle::flash.html.twig' import flash %}
+{% block headline %}Nutzer löschen{% endblock %}
+
+{% block content %}
+
+	{{ flash('error', '<b>ACHTUNG</b> Möchten Sie den Nutzer "%name%" unwiderruflich löschen?'|trans({ '%name%': user.username }), false, true) }}
+
+	<form class="inline" action="{{ path('user_delete', {'id': user.id}) }}" method="post">
+		<input type="hidden" name="confirmed" value="1" />
+		<div class="form-actions">
+			<button class="btn btn-danger"><i class="icon-trash"></i> Nutzer löschen</button>
+			<a href="{{ path('user_index') }}" class="btn">Abbrechen</a>
+		</div>
+	</form>
+{% endblock %}

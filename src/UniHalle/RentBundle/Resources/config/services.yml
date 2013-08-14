@@ -37,6 +37,11 @@ services:
         tags:
             - { name: twig.extension }
 
+    UniHalle.twig.personType_extension:
+        class: UniHalle\RentBundle\Twig\PersonTypeExtension
+        tags:
+            - { name: twig.extension }
+
     ldap.listener:
         class: UniHalle\RentBundle\EventListener\LdapSecurityListener
         tags:

@@ -1,0 +1,88 @@
+{% extends 'RentBundle::base.html.twig' %}
+{% from 'MopaBootstrapBundle::flash.html.twig' import flash %}
+
+{% block headline %}Nutzer{% endblock %}
+
+{% block content %}
+
+	<div class="clearfix">
+		<ul class="nav nav-pills pull-left">
+	  		<li {% if status == 'active' %}class="active"{% endif %}>
+	    		<a href="{{ path('user_index', {'status': 'active'}) }}">Aktiv</a>
+	  		</li>
+	  		<li {% if status == 'waiting' %}class="active"{% endif %}>
+	    		<a href="{{ path('user_index', {'status': 'waiting'}) }}">Wartend</a>
+	  		</li>
+	  		<li {% if status == 'disabled' %}class="active"{% endif %}>
+	    		<a href="{{ path('user_index', {'status': 'disabled'}) }}">Gesperrt</a>
+	  		</li>
+	  	</ul>
+	</div>
+
+  	{% if users|length == 0 %}
+  		{% if status == 'active' %}
+  			{{ flash('info', 'Es sind keine aktiven Nutzer vorhanden.', false, false) }}
+  		{% elseif status == 'waiting' %}
+  			{{ flash('info', 'Es liegen keine offenen Nutzerregistrierungen vor.', false, false) }}
+  		{% elseif status == 'disabled' %}
+  			{{ flash('info', 'Es sind keine gesperrten Nutzer vorhanden.', false, false) }}
+  		{% endif %}
+  	{% else %}
+		<table class="table table-striped">
+			<thead>
+				<tr>
+    				<th>
+    					{% if users.isSorted('u.username') %}<i class="icon-sort-by-attributes{% if sortDirection == 'desc'%}-alt{% endif %}"></i>{% endif %}
+    					{{ knp_pagination_sortable(users, 'Nutzerkennzeichen', 'u.username') }}
+    				</th>
+					<th>
+    					{% if users.isSorted('u.surname') %}<i class="icon-sort-by-attributes{% if sortDirection == 'desc'%}-alt{% endif %}"></i>{% endif %}
+    					{{ knp_pagination_sortable(users, 'Nachname', 'u.surname') }}
+    				</th>
+    				<th>
+    					{% if users.isSorted('u.name') %}<i class="icon-sort-by-attributes{% if sortDirection == 'desc'%}-alt{% endif %}"></i>{% endif %}
+    					{{ knp_pagination_sortable(users, 'Vorname', 'u.name') }}
+    				</th>
+    				<th>
+    					{% if users.isSorted('u.email') %}<i class="icon-sort-by-attributes{% if sortDirection == 'desc'%}-alt{% endif %}"></i>{% endif %}
+    					{{ knp_pagination_sortable(users, 'E-Mail', 'u.email') }}
+    				</th>
+    				<th>
+    					{% if users.isSorted('u.personType') %}<i class="icon-sort-by-attributes{% if sortDirection == 'desc'%}-alt{% endif %}"></i>{% endif %}
+    					{{ knp_pagination_sortable(users, 'Account-Typ', 'u.personType') }}
+    				</th>
+    				<th>
+    					Aktion
+    				</th>
+				</tr>
+			</thead>
+			<tbody>
+				{% for user in users %}
+					<tr>
+						<td>{{ user.username }}</td>
+						<td>{{ user.surname }}</td>
+						<td>{{ user.name }}</td>
+						<td>{{ user.mail }}</td>
+						<td>{{ user.personType|personTypeName|raw }}</td>
+						<td>
+							{% if status == 'waiting' or status == 'disabled' %}
+								<a href="{{ path('user_status', {'id': user.id, 'status': status, 'new_status': 'active'}) }}" class="btn btn-success btn-small">
+									<i class="icon icon-ok"></i> Freischalten</a>
+							{% endif %}
+							{% if status == 'active' %}
+								<a href="{{ path('user_status', {'id': user.id, 'status': status, 'new_status': 'disabled'}) }}" class="btn btn-warning btn-small"><i class="icon icon-lock"></i> Sperren</a>
+							{% endif %}
+							<a href="{{ path('user_delete', {'id': user.id}) }}" class="btn btn-danger btn-small"><i class="icon icon-trash"></i> Löschen</a>
+					</td>
+					</tr>
+				{% endfor %}
+			</tbody>
+		</table>
+
+		<div class="navigation text-center">
+	    	{{ knp_pagination_render(users) }}
+		</div>
+
+  	{% endif %}
+
+{% endblock %}

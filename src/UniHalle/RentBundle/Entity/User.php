@@ -4,6 +4,9 @@ namespace UniHalle\RentBundle\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Validator\Constraints as Assert;
+use Fresh\Bundle\DoctrineEnumBundle\Validator\Constraints as DoctrineAssert;
+use UniHalle\RentBundle\Types\PersonType;
+use UniHalle\RentBundle\Types\UserStatusType;
 
 /**
  * @ORM\Entity
@@ -47,6 +50,18 @@ class User
      * @ORM\OneToMany(targetEntity="Booking", mappedBy="user", cascade={"all"})
      */
     private $bookings;
+
+    /**
+     * @DoctrineAssert\Enum(entity="UniHalle\RentBundle\Types\PersonType")
+     * @ORM\Column(type="string", type="PersonType", nullable=false)
+     */
+    private $personType;
+
+    /**
+     * @DoctrineAssert\Enum(entity="UniHalle\RentBundle\Types\UserStatusType")
+     * @ORM\Column(type="string", type="UserStatusType", nullable=false)
+     */
+    private $status;
 
     /**
      * @ORM\Column(type="datetime", nullable=true)
@@ -222,6 +237,52 @@ class User
     public function getBookings()
     {
         return $this->bookings;
+    }
+
+    /**
+     * Set personType
+     *
+     * @param string $personType
+     * @return User
+     */
+    public function setPersonType($personType)
+    {
+        $this->personType = $personType;
+
+        return $this;
+    }
+
+    /**
+     * Get personType
+     *
+     * @return personType
+     */
+    public function getPersonType()
+    {
+        return $this->personType;
+    }
+
+    /**
+     * Set status
+     *
+     * @param string $status
+     * @return User
+     */
+    public function setStatus($status)
+    {
+        $this->status = $status;
+
+        return $this;
+    }
+
+    /**
+     * Get status
+     *
+     * @return status
+     */
+    public function getStatus()
+    {
+        return $this->status;
     }
 
     /**

@@ -29,6 +29,18 @@ class LoadSitePlaceholder extends AbstractFixture implements OrderedFixtureInter
         $manager->persist($pMail);
         $this->addReference('placeholder-mail', $pMail);
 
+        $pUid = new SitePlaceholder();
+        $pUid->setName('Nutzerkennzeichen');
+        $pUid->setPlaceholder('{USER.NKZ}');
+        $manager->persist($pUid);
+        $this->addReference('placeholder-uid', $pUid);
+
+        $pAccountType = new SitePlaceholder();
+        $pAccountType->setName('Accounttyp');
+        $pAccountType->setPlaceholder('{USER.ACCOUNT_TYPE}');
+        $manager->persist($pAccountType);
+        $this->addReference('placeholder-accountType', $pAccountType);
+
         $pDateNow = new SitePlaceholder();
         $pDateNow->setName('Aktuelles Datum');
         $pDateNow->setPlaceholder('{DATE.NOW}');
