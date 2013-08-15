@@ -64,6 +64,10 @@ class UserController extends Controller
             throw $this->createNotFoundException('Nutzer wurde nicht gefunden.');
         }
 
+        if ($user->getUsername() == $this->get('security.context')->getToken()->getUser()->getUsername()) {
+            throw new \Exception('Der Status des eigenen Accounts kann nicht geändert werden.');
+        }
+
         if ($new_status == 'active') {
             $user->setStatus(UserStatusType::ACTIVE);
             $em->flush();
@@ -71,7 +75,7 @@ class UserController extends Controller
                 'success',
                 $this->get('translator')->trans('Nutzer wurde freigeschaltet.')
             );
-            // @todo: send mail to user
+            $this->sendUserStatusNotfication($user->getId(), 'active');
         } else if ($new_status == 'disabled') {
             $user->setStatus(UserStatusType::DISABLED);
             $em->flush();
@@ -79,6 +83,7 @@ class UserController extends Controller
                 'success',
                 $this->get('translator')->trans('Nutzer wurde gesperrt.')
             );
+            $this->sendUserStatusNotfication($user->getId(), 'disabled');
         } else {
             throw new \Exception('Ungültiger Status');
         }
@@ -98,7 +103,12 @@ class UserController extends Controller
             throw $this->createNotFoundException('Nutzer wurde nicht gefunden.');
         }
 
+        if ($user->getUsername() == $this->get('security.context')->getToken()->getUser()->getUsername()) {
+            throw new \Exception('Der eigene Account kann nicht gelöscht werden.');
+        }
+
         if ($request->isMethod('POST') && $request->request->get('confirmed') == 1) {
+            $this->sendUserStatusNotfication($user->getId(), 'deleted');
             $em->remove($user);
             $em->flush();
             $this->get('session')->getFlashBag()->add(
@@ -120,6 +130,11 @@ class UserController extends Controller
     public function registerAction(Request $request)
     {
         $em = $this->getDoctrine()->getManager();
+        $site = $em->getRepository('RentBundle:Site')
+                   ->findOneByIdentifier('register');
+        if (!$site) {
+            throw $this->createNotFoundException('Seite wurde nicht gefunden.');
+        }
 
         if ($request->isMethod('POST')) {
             $email = $request->get('inputEmail');
@@ -129,7 +144,7 @@ class UserController extends Controller
                     'error',
                     $this->get('translator')->trans('Bitte geben Sie ihre E-Mail Adresse und ihr Nutzerkennzeichen an.')
                 );
-                return $this->render('RentBundle:User:register_form.html.twig');
+                return $this->render('RentBundle:User:register_form.html.twig', array('site' => $site));
             }
 
             $user = $em->getRepository('RentBundle:User')->findOneByUsername($nkz);
@@ -138,7 +153,7 @@ class UserController extends Controller
                     'error',
                     $this->get('translator')->trans('Sie sind bereits für den Geräteverleih registriert.')
                 );
-                return $this->render('RentBundle:User:register_form.html.twig');
+                return $this->render('RentBundle:User:register_form.html.twig', array('site' => $site));
             }
 
             $userData = $this->getUserData($nkz);
@@ -148,7 +163,7 @@ class UserController extends Controller
                     'error',
                     $this->get('translator')->trans('Es wurde kein Benutzer mit dem Kennzeichen "'.$nkz.'" gefunden.')
                 );
-                return $this->render('RentBundle:User:register_form.html.twig');
+                return $this->render('RentBundle:User:register_form.html.twig', array('site' => $site));
             }
 
             if ($userData['email'] != $email) {
@@ -156,17 +171,17 @@ class UserController extends Controller
                     'error',
                     $this->get('translator')->trans('Ihr E-Mail Adresse konnte ihrem Nutzerkennzeichen nicht zugeordnet werden.')
                 );
-                return $this->render('RentBundle:User:register_form.html.twig');
+                return $this->render('RentBundle:User:register_form.html.twig', array('site' => $site));
             }
 
+            $isAdmin = in_array($nkz, $this->container->getParameter('admin_users'));
             $user = new User();
-            $user->setAdmin(false);
             $user->setMail($email);
             $user->setUsername($nkz);
             $user->setName($userData['name']);
             $user->setSurname($userData['surname']);
             $user->setPersonType(PersonType::mapMluPersonType($userData['mluPersonType']));
-            $user->setStatus(UserStatusType::WAITING);
+            $user->setStatus($isAdmin ? UserStatusType::ACTIVE : UserStatusType::WAITING);
             $em->persist($user);
             $em->flush();
 
@@ -179,7 +194,7 @@ class UserController extends Controller
             return $this->redirect($this->generateUrl('index'));
         }
 
-        return $this->render('RentBundle:User:register_form.html.twig');
+        return $this->render('RentBundle:User:register_form.html.twig', array('site' => $site));
     }
 
     private function getUserData($uid)
@@ -233,6 +248,42 @@ class UserController extends Controller
         $message = \Swift_Message::newInstance()->setSubject($mail->getSubject())
                                                 ->setFrom($config->getValue('mailSender'))
                                                 ->setTo($config->getValue('adminMail'))
+                                                ->setBody($content);
+
+        $this->get('mailer')->send($message);
+    }
+
+    private function sendUserStatusNotfication($uid, $status)
+    {
+        $em = $this->getDoctrine()->getManager();
+        $config = $em->getRepository('RentBundle:Configuration');
+        $user = $em->getRepository('RentBundle:User')->findOneById($uid);
+        if (!$user) {
+            throw $this->createNotFoundException('Nutzer wurde nicht gefunden.');
+        }
+
+        $mail = null;
+        if ($status == 'active') {
+            $mail = $em->getRepository('RentBundle:Site')->findOneByIdentifier('mailRegAccepted');
+        } else if ($status == 'disabled') {
+            $mail = $em->getRepository('RentBundle:Site')->findOneByIdentifier('mailRegDisabled');
+        } else if ($status == 'deleted') {
+            $mail = $em->getRepository('RentBundle:Site')->findOneByIdentifier('mailRegDeleted');
+        }
+        if (!$mail) {
+            throw $this->createNotFoundException('E-Mail Inhalt wurde nicht gefunden.');
+        }
+
+        $content = $mail->getContent();
+        $content = str_replace('{USER.SURNAME}', $user->getSurname(), $content);
+        $content = str_replace('{USER.NAME}', $user->getName(), $content);
+        $content = str_replace('{USER.MAIL}', $user->getMail(), $content);
+        $content = str_replace('{USER.NKZ}', $user->getUsername(), $content);
+        $content = str_replace('{USER.ACCOUNT_TYPE}', PersonType::getAccountTypeName($user->getPersonType()), $content);
+
+        $message = \Swift_Message::newInstance()->setSubject($mail->getSubject())
+                                                ->setFrom($config->getValue('mailSender'))
+                                                ->setTo($user->getMail())
                                                 ->setBody($content);
 
         $this->get('mailer')->send($message);

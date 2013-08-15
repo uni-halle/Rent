@@ -42,11 +42,6 @@ class User
     private $email;
 
     /**
-     * @ORM\Column(type="boolean")
-     */
-    private $admin;
-
-    /**
      * @ORM\OneToMany(targetEntity="Booking", mappedBy="user", cascade={"all"})
      */
     private $bookings;
@@ -181,29 +176,6 @@ class User
     public function getMail()
     {
         return $this->email;
-    }
-
-    /**
-     * Set admin
-     *
-     * @param boolean $admin
-     * @return User
-     */
-    public function setAdmin($admin)
-    {
-        $this->admin = $admin;
-
-        return $this;
-    }
-
-    /**
-     * Get admin
-     *
-     * @return boolean
-     */
-    public function isAdmin()
-    {
-        return $this->admin;
     }
 
     /**

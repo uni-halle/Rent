@@ -25,20 +25,25 @@ class BookingController extends Controller
     /**
      * @Route("/{time}", name="booking_index", requirements={"time" = "now|past"})
      * @Secure(roles="ROLE_USER")
-     * @todo: set correct user
      */
     public function indexAction(Request $request, $time = 'now')
     {
+        $em = $this->getDoctrine()->getManager();
+        $user = $em->getRepository('RentBundle:User')->findOneByUsername(
+                    $this->get('security.context')->getToken()->getUser()->getUsername()
+                );
+        if (!$user) {
+            throw $this->createNotFoundException('Nutzer wurde nicht gefunden.');
+        }
+
         $securityContext = $this->get('security.context');
         if ($securityContext->isGranted('ROLE_ADMIN')) {
             $userId = 0;
         } else {
-            $userId = 1;
+            $userId = $user->getId();
         }
 
-        $em = $this->getDoctrine()->getManager();
-
-        $deviceId =$request->get('deviceId', 0);
+        $deviceId = $request->get('deviceId', 0);
         $devices = $em->getRepository('RentBundle:Device')->findBy(
             array(),
             array(
@@ -75,12 +80,17 @@ class BookingController extends Controller
     /**
      * @Route("/{id}", name="booking_show", requirements={"id"="\d+"})
      * @Secure(roles="ROLE_USER")
-     * @todo enable user check
      */
     public function showAction($id)
     {
         $securityContext = $this->get('security.context');
         $em = $this->getDoctrine()->getManager();
+        $user = $em->getRepository('RentBundle:User')->findOneByUsername(
+                    $this->get('security.context')->getToken()->getUser()->getUsername()
+                );
+        if (!$user) {
+            throw $this->createNotFoundException('Nutzer wurde nicht gefunden.');
+        }
         $booking = $em->getRepository('RentBundle:Booking')
                       ->findOneById($id);
 
@@ -88,7 +98,7 @@ class BookingController extends Controller
             throw $this->createNotFoundException('Buchung wurde nicht gefunden.');
         }
 
-        if (false /*$booking->getUser()->getId() != $securityContext->getToken()->getUser()->getId()*/) {
+        if ($booking->getUser()->getId() != $user->getId()) {
             throw new AccessDeniedHttpException('Sie dürfen diese Buchung nicht einsehen.');
         }
 
@@ -101,7 +111,6 @@ class BookingController extends Controller
     /**
      * @Route("/new/{device_id}/{start_display}/{start_date}/{end_date}", name="booking_new")
      * @Secure(roles="ROLE_USER")
-     * @todo: set correct user
      */
     public function newAction(Request $request, $device_id, $start_display = null, $start_date = null, $end_date = null)
     {
@@ -114,8 +123,12 @@ class BookingController extends Controller
             throw $this->createNotFoundException('Gerät wurde nicht gefunden.');
         }
 
-        $user = $em->getRepository('RentBundle:User')
-                   ->findOneById(1);
+        $user = $em->getRepository('RentBundle:User')->findOneByUsername(
+                    $this->get('security.context')->getToken()->getUser()->getUsername()
+                );
+        if (!$user) {
+            throw $this->createNotFoundException('Nutzer wurde nicht gefunden.');
+        }
 
         $booking->setDevice($device);
         $booking->setUser($user);
@@ -387,20 +400,22 @@ class BookingController extends Controller
     /**
      * @Route("/extend/{booking_id}/{start_display}/{end_date}", name="booking_extend")
      * @Secure(roles="ROLE_USER")
-     * @todo: enable user check
      */
     public function extendAction(Request $request, $booking_id, $start_display = null, $end_date = null)
     {
         $em = $this->getDoctrine()->getManager();
+        $user = $em->getRepository('RentBundle:User')->findOneByUsername(
+                    $this->get('security.context')->getToken()->getUser()->getUsername()
+                );
+        if (!$user) {
+            throw $this->createNotFoundException('Nutzer wurde nicht gefunden.');
+        }
 
         $booking = $em->getRepository('RentBundle:Booking')
                       ->findOneById($booking_id);
         if (!$booking) {
             throw $this->createNotFoundException('Buchung wurde nicht gefunden.');
         }
-
-        $user = $em->getRepository('RentBundle:User')
-                   ->findOneById(1);
 
         if ($booking->getUser()->getId() != $user->getId()) {
             throw new AccessDeniedHttpException('Sie dürfen diese Buchung nicht bearbeiten.');

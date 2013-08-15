@@ -20,3 +20,5 @@ parameters:
     ldap_user_basedn: ou=rent,c=de
     ldap_admin_user: uid=rent_admin,c=de
     ldap_admin_pass: xxx
+
+    admin_users: ["abcde"]

@@ -13,11 +13,13 @@ class LdapSecurityListener implements EventSubscriberInterface
 {
     private $doctrine;
     private $session;
+    private $adminUsers;
 
-    public function __construct(Doctrine $doctrine, $session)
+    public function __construct(Doctrine $doctrine, $session, $adminUsers)
     {
         $this->doctrine = $doctrine;
         $this->session = $session;
+        $this->adminUsers = $adminUsers;
     }
 
     public static function getSubscribedEvents()
@@ -31,6 +33,9 @@ class LdapSecurityListener implements EventSubscriberInterface
     {
         $user = $event->getUser();
         $user->addRole('ROLE_USER');
+        if (in_array($user->getUsername(), $this->adminUsers)) {
+            $user->addRole('ROLE_ADMIN');
+        }
 
         $em = $this->doctrine->getEntityManager();
         $user = $em->getRepository('RentBundle:User')->findOneByUsername($user->getUsername());

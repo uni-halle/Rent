@@ -26,6 +26,12 @@ class LoadSites extends AbstractFixture implements OrderedFixtureInterface
         $indexContact->setType(SiteType::CONTENT);
         $sites[] = $indexContact;
 
+        $registerContent = new Site();
+        $registerContent->setName('Registrierung');
+        $registerContent->setIdentifier('register');
+        $registerContent->setType(SiteType::CONTENT);
+        $sites[] = $registerContent;
+
         $docRent = new Site();
         $docRent->setName('Dokument: Leihschein');
         $docRent->setIdentifier('docRent');
@@ -44,15 +50,28 @@ class LoadSites extends AbstractFixture implements OrderedFixtureInterface
         $mailRegAccepted->setName('Nutzer: Freischaltung');
         $mailRegAccepted->setIdentifier('mailRegAccepted');
         $mailRegAccepted->setType(SiteType::USER_MAIL);
+        $mailRegAccepted->setSubject('Ihr Nutzerkonto wurde freigschaltet');
+        $mailRegAccepted->setContent('Ihr Nutzerkonto wurde freigschaltet');
         $this->addRegisterMailPlaceholders($mailRegAccepted);
         $sites[] = $mailRegAccepted;
 
-        $mailRegDenied = new Site();
-        $mailRegDenied->setName('Nutzer: Registrierung abgelehnt');
-        $mailRegDenied->setIdentifier('mailRegDenied');
-        $mailRegDenied->setType(SiteType::USER_MAIL);
-        $this->addRegisterMailPlaceholders($mailRegDenied);
-        $sites[] = $mailRegDenied;
+        $mailRegDisabled = new Site();
+        $mailRegDisabled->setName('Nutzer: Konto gesperrt');
+        $mailRegDisabled->setIdentifier('mailRegDisabled');
+        $mailRegDisabled->setType(SiteType::USER_MAIL);
+        $mailRegDisabled->setSubject('Ihr Nutzerkonto wurde gesperrt');
+        $mailRegDisabled->setContent('Ihr Nutzerkonto wurde gesperrt');
+        $this->addRegisterMailPlaceholders($mailRegDisabled);
+        $sites[] = $mailRegDisabled;
+
+        $mailRegDeleted = new Site();
+        $mailRegDeleted->setName('Nutzer: Konto gelöscht');
+        $mailRegDeleted->setIdentifier('mailRegDeleted');
+        $mailRegDeleted->setType(SiteType::USER_MAIL);
+        $mailRegDeleted->setSubject('Ihr Nutzerkonto wurde gelöscht');
+        $mailRegDeleted->setContent('Ihr Nutzerkonto wurde gelöscht');
+        $this->addRegisterMailPlaceholders($mailRegDeleted);
+        $sites[] = $mailRegDeleted;
 
         $mailRentalAccepted = new Site();
         $mailRentalAccepted->setName('Buchung bestätigt');
