@@ -25,10 +25,7 @@ class UserController extends Controller
     public function indexAction(Request $request, $status = 'active')
     {
         $em = $this->getDoctrine()->getManager();
-        $usersQuery = $em->getRepository('RentBundle:User')->findBy(
-            array('status' => $status),
-            array('username' => 'ASC')
-        );
+        $usersQuery = $em->getRepository('RentBundle:User')->getUsers($status);
 
         $paginator  = $this->get('knp_paginator');
         $pagination = $paginator->paginate(

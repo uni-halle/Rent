@@ -9,7 +9,7 @@ use UniHalle\RentBundle\Types\PersonType;
 use UniHalle\RentBundle\Types\UserStatusType;
 
 /**
- * @ORM\Entity
+ * @ORM\Entity(repositoryClass="UniHalle\RentBundle\Repository\UserRepository")
  * @ORM\HasLifecycleCallbacks
  */
 class User
