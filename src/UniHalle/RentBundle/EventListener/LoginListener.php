@@ -4,6 +4,7 @@ namespace UniHalle\RentBundle\EventListener;
 
 use Doctrine\Bundle\DoctrineBundle\Registry as Doctrine;
 use Symfony\Component\Security\Http\Event\InteractiveLoginEvent;
+use UniHalle\RentBundle\Types\PersonType;
 
 class LoginListener
 {
@@ -16,19 +17,15 @@ class LoginListener
 
     public function onLogin(InteractiveLoginEvent $event)
     {
-        $user = $event->getAuthenticationToken()->getUser();
-        if ($user && get_class($user) == 'IMAG\LdapBundle\User\LdapUser') {
-            /*
-            $this->doctrine
-                 ->getEntityManager()
-                 ->getRepository('RentBundle:User')
-                 ->insertOrRefreshUser(
-                     $user->getUsername(),
-                     $user->getAttribute('cn'),
-                     in_array('ROLE_ADMIN', $user->getRoles())
-                 );
-             *
-             */
+        $eventUser = $event->getAuthenticationToken()->getUser();
+        if ($eventUser && get_class($eventUser) == 'IMAG\LdapBundle\User\LdapUser') {
+            $em = $this->doctrine->getEntityManager();
+            $user = $em->getRepository('RentBundle:User')->findOneByUsername($eventUser->getUsername());
+            $user->setSurname($eventUser->getAttribute('sn'));
+            $user->setName($eventUser->getAttribute('givenname'));
+            $user->setMail($eventUser->getAttribute('mail'));
+            $user->setPersonType(PersonType::mapMluPersonType($eventUser->getAttribute('mlupersontype')));
+            $em->flush();
         }
     }
 }

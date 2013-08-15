@@ -1,13 +1,17 @@
 {% extends 'RentBundle::base.html.twig' %}
-{% from 'MopaBootstrapBundle::flash.html.twig' import flash %}
+{% from 'MopaBootstrapBundle::flash.html.twig' import flash, session_flash %}
 
 {% block page_header %}
 {% endblock %}
 
+{% block flashes %}{% endblock %}
+
 {% block content %}
 	<form class="form-signin" action="{{ path('login_check') }}" method="post">
 		<h2 class="form-signin-heading">Bitte anmelden</h2>
-		{% if error %}
+		{% if app.session.flashbag.peekAll|length > 0 %}
+        	{{ session_flash() }}
+        {% elseif error %}
 			{{ flash('error', error.message|trans, false, false) }}
     		{{ flash('info', 'Wenn Sie ihr Passwort vergessen haben, hilft Ihnen das <a href="http://serviceportal.itz.uni-halle.de/" target="_blank"><b>Serviceportal des ITZ</b></a>, es schnell und einfach zurückzusetzen.', false, true) }}
 		{% endif %}

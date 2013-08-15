@@ -44,6 +44,7 @@ services:
 
     ldap.listener:
         class: UniHalle\RentBundle\EventListener\LdapSecurityListener
+        arguments: [@doctrine, @session]
         tags:
             - { name: kernel.event_subscriber }
 

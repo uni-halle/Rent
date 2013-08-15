@@ -66,4 +66,4 @@ imag_ldap:
     user:
         base_dn: %ldap_user_basedn%
         name_attribute: uid
-        attributes: [mluPersonType]
+        attributes: [sn, givenname, mail, mlupersontype]
