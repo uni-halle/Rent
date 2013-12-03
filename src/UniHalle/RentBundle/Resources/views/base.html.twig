@@ -10,6 +10,7 @@
 <head>
     <meta charset="UTF-8" />
     {% block head_style %}
+    {# commented out because there is no java, no node and no lessc on ITZ servers...
     {% stylesheets filter='less,yui_css'
     	'@RentBundle/Resources/public/less/rent.less'
     	'@MopaBootstrapBundle/Resources/bootstrap/less/responsive.less'
@@ -20,6 +21,13 @@
 	%}
     <link href="{{ asset_url }}" type="text/css" rel="stylesheet" media="screen" />
     {% endstylesheets %}
+    #}
+    <link href="{{ asset('bundles/rent/css/rent.css') }}" type="text/css" rel="stylesheet" media="screen" />
+    <link href="{{ asset('bundles/rent/css/responsive.css') }}" type="text/css" rel="stylesheet" media="screen" />
+    <link href="{{ asset('bundles/rent/css/eyecon-bootstrap-datepicker.css') }}" type="text/css" rel="stylesheet" media="screen" />
+    <link href="{{ asset('bundles/rent/css/bootstrap-chosen.min.css') }}" type="text/css" rel="stylesheet" media="screen" />
+    <link href="{{ asset('bundles/rent/css/ui.css') }}" type="text/css" rel="stylesheet" media="screen" />
+    <link href="http://fonts.googleapis.com/css?family=Denk+One" type="text/css" rel="stylesheet" media="screen" />
 	<link rel="stylesheet" type="text/css" href="{{ asset('bundles/bmatznerfontawesome/css/font-awesome.min.css') }}" />
     {% endblock head_style %}
 
