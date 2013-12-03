@@ -67,12 +67,12 @@
 						<td>
 							{% if status == 'waiting' or status == 'disabled' %}
 								<a href="{{ path('user_status', {'id': user.id, 'status': status, 'new_status': 'active'}) }}" class="btn btn-success btn-small">
-									<i class="icon icon-ok"></i> Freischalten</a>
+									<i class="icon icon-white icon-ok"></i> Freischalten</a>
 							{% endif %}
 							{% if status == 'active' %}
-								<a href="{{ path('user_status', {'id': user.id, 'status': status, 'new_status': 'disabled'}) }}" class="btn btn-warning btn-small"><i class="icon icon-lock"></i> Sperren</a>
+								<a href="{{ path('user_status', {'id': user.id, 'status': status, 'new_status': 'disabled'}) }}" class="btn btn-warning btn-small"><i class="icon icon-white icon-lock"></i> Sperren</a>
 							{% endif %}
-							<a href="{{ path('user_delete', {'id': user.id}) }}" class="btn btn-danger btn-small"><i class="icon icon-trash"></i> Löschen</a>
+							<a href="{{ path('user_delete', {'id': user.id}) }}" class="btn btn-danger btn-small"><i class="icon icon-white icon-trash"></i> Löschen</a>
 					</td>
 					</tr>
 				{% endfor %}
