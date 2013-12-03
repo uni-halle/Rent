@@ -6,6 +6,7 @@ use Symfony\Component\HttpFoundation\Request;
 // read http://symfony.com/doc/current/book/installation.html#configuration-and-setup for more information
 //umask(0000);
 
+date_default_timezone_set('Europe/Berlin');
 $loader = require_once __DIR__.'/../app/bootstrap.php.cache';
 require_once __DIR__.'/../app/AppKernel.php';
 
