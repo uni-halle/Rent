@@ -19,7 +19,7 @@ class LoginListener
     {
         $eventUser = $event->getAuthenticationToken()->getUser();
         if ($eventUser && get_class($eventUser) == 'IMAG\LdapBundle\User\LdapUser') {
-            $em = $this->doctrine->getEntityManager();
+            $em = $this->doctrine->getManager();
             $user = $em->getRepository('RentBundle:User')->findOneByUsername($eventUser->getUsername());
             $user->setSurname($eventUser->getAttribute('sn'));
             $user->setName($eventUser->getAttribute('givenname'));

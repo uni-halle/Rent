@@ -37,7 +37,7 @@ class LdapSecurityListener implements EventSubscriberInterface
             $user->addRole('ROLE_ADMIN');
         }
 
-        $em = $this->doctrine->getEntityManager();
+        $em = $this->doctrine->getManager();
         $user = $em->getRepository('RentBundle:User')->findOneByUsername($user->getUsername());
         if (!$user) {
             $this->session->getFlashBag()->add('error', 'Sie sind noch nicht für den Geräteverleih registriert.');
