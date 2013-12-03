@@ -86,6 +86,7 @@
     {% endblock container %}
 
     {% block foot_script %}
+    {# commented out because there is no java, no node and no lessc on ITZ servers...
     {% javascripts
         'http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js'
         '@MopaBootstrapBundle/Resources/bootstrap/js/bootstrap-transition.js'
@@ -109,6 +110,28 @@
     %}
         <script type="text/javascript" src="{{ asset_url }}"></script>
     {% endjavascripts %}
+    #}
+
+    <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+    <script type="text/javascript" src="{{ asset('bundles/rent/js/bootstrap/bootstrap-transition.js') }}"></script>
+    <script type="text/javascript" src="{{ asset('bundles/rent/js/bootstrap/bootstrap-alert.js') }}"></script>
+    <script type="text/javascript" src="{{ asset('bundles/rent/js/bootstrap/bootstrap-modal.js') }}"></script>
+    <script type="text/javascript" src="{{ asset('bundles/rent/js/bootstrap/bootstrap-dropdown.js') }}"></script>
+    <script type="text/javascript" src="{{ asset('bundles/rent/js/bootstrap/bootstrap-scrollspy.js') }}"></script>
+    <script type="text/javascript" src="{{ asset('bundles/rent/js/bootstrap/bootstrap-tab.js') }}"></script>
+    <script type="text/javascript" src="{{ asset('bundles/rent/js/bootstrap/bootstrap-tooltip.js') }}"></script>
+    <script type="text/javascript" src="{{ asset('bundles/rent/js/bootstrap/bootstrap-popover.js') }}"></script>
+    <script type="text/javascript" src="{{ asset('bundles/rent/js/bootstrap/bootstrap-button.js') }}"></script>
+    <script type="text/javascript" src="{{ asset('bundles/rent/js/bootstrap/bootstrap-collapse.js') }}"></script>
+    <script type="text/javascript" src="{{ asset('bundles/rent/js/bootstrap/bootstrap-carousel.js') }}"></script>
+    <script type="text/javascript" src="{{ asset('bundles/rent/js/bootstrap/bootstrap-typeahead.js') }}"></script>
+    <script type="text/javascript" src="{{ asset('bundles/mopabootstrap/js/mopabootstrap-collection.js') }}"></script>
+    <script type="text/javascript" src="{{ asset('bundles/mopabootstrap/js/mopabootstrap-subnav.js') }}"></script>
+    <script type="text/javascript" src="{{ asset('bundles/mopabootstrap/js/eyecon-bootstrap-datepicker.js') }}"></script>
+    <script type="text/javascript" src="{{ asset('bundles/rent/js/chosen.jquery.min.js') }}"></script>
+    <script type="text/javascript" src="{{ asset('bundles/rent/js/ui.js') }}"></script>
+    <script type="text/javascript" src="{{ asset('bundles/rent/js/calendar.js') }}"></script>
+
     {% endblock foot_script %}
 {% endblock body %}
 </body>
