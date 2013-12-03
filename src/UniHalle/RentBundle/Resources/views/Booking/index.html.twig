@@ -84,7 +84,7 @@
 							<td>
 								<div class="btn-group">
 								  	<a class="btn dropdown-toggle btn-small {% if booking.status == 'preliminary' %}btn-info{% elseif booking.status == 'canceled' %}btn-warning{% elseif booking.status == 'gotBack' %}btn-success{% elseif booking.status == 'inRent' %}btn-danger{% endif %}" data-toggle="dropdown" href="#">
-								  	{{ booking.status|readable_enum_value('BookingStatusType') }}
+								  	{{ booking.status|readable('BookingStatusType') }}
 							    	<span class="caret"></span>
 								  	</a>
 								  	<ul class="dropdown-menu">
@@ -123,7 +123,7 @@
 						{% elseif is_granted('ROLE_USER') %}
 							<td>
 								<span class="badge {% if booking.status == 'preliminary' %}badge-info{% elseif booking.status == 'canceled' %}badge-important{% elseif booking.status == 'gotBack' %}badge-success{% elseif booking.status == 'inRent' %}badge-warning{% endif %}">
-								{{ booking.status|readable_enum_value('BookingStatusType') }}
+								{{ booking.status|readable('BookingStatusType') }}
 								</span>
 							</td>
 							{% if time == 'now' %}
